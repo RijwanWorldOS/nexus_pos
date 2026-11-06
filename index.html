@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electric Bodyguard - Master Command Center (Asad AI)</title>
+    <style>
+        :root {
+            --bg-primary: #020617; 
+            --bg-card: #071124; 
+            --accent-cyan: #00f3ff;
+            --accent-green: #00ff66; 
+            --accent-gold: #f1c40f; 
+            --text-main: #f0f6fc; 
+            --text-muted: #8b949e;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; }
+        body { background-color: var(--bg-primary); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4px; }
+        
+        .app-frame { 
+            width: 100%; max-width: 480px; height: 99vh; background: var(--bg-card); 
+            border: 2.5px solid var(--accent-cyan); border-radius: 18px; padding: 12px; 
+            box-shadow: 0 0 35px rgba(0,243,255,0.25); display: flex; flex-direction: column; gap: 10px; position: relative; overflow: hidden; 
+        }
+        
+        /* एक्सपेंसिव और हाई-टेक हेडर */
+        .expansive-header { 
+            background: linear-gradient(135deg, rgba(0,243,255,0.18) 0%, rgba(0,255,102,0.12) 100%);
+            border: 2px solid rgba(0,243,255,0.6); border-radius: 12px; padding: 10px; text-align: center;
+            box-shadow: inset 0 0 15px rgba(0,243,255,0.2);
+        }
+        .header-title { font-size: 12.5px; font-weight: 900; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,243,255,0.6); }
+        .header-subtitle { font-size: 8.5px; color: var(--accent-green); margin-top: 3px; font-weight: bold; }
+
+        /* रनिंग मार्की */
+        .running-marquee-box { 
+            background: rgba(0,255,102,0.1); border: 1.5px solid rgba(0,255,102,0.4); 
+            border-radius: 8px; overflow: hidden; white-space: nowrap; padding: 5px 0; 
+        }
+        .running-marquee-box marquee { font-size: 9px; font-weight: bold; color: var(--accent-green); text-transform: uppercase; }
+
+        /* लाइव स्टेटिस्टिक्स विजेट्स */
+        .stats-grid { display: flex; gap: 8px; }
+        .stat-box { 
+            flex: 1; background: #030712; border: 1.5px solid rgba(0,243,255,0.35); border-radius: 10px; 
+            padding: 8px 4px; text-align: center; box-shadow: inset 0 0 12px rgba(0,0,0,0.6); 
+        }
+        .stat-val { font-size: 12px; font-weight: 900; color: var(--accent-green); }
+        .stat-lbl { font-size: 7.5px; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+
+        /* नेविगेशन कार्ड्स */
+        .launchpad-grid { flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; padding: 2px 0; justify-content: center; }
+        
+        .launch-card { 
+            background: linear-gradient(145deg, #071120 0%, #030712 100%); 
+            border: 2px solid rgba(0,243,255,0.35); border-radius: 14px; padding: 14px; 
+            display: flex; align-items: center; justify-content: space-between; cursor: pointer; 
+            transition: all 0.2s ease; text-decoration: none; color: inherit;
+        }
+        .launch-card:hover { border-color: var(--accent-cyan); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,243,255,0.3); background: rgba(0,243,255,0.08); }
+        
+        .launch-card.green { border-color: rgba(0,255,102,0.45); }
+        .launch-card.green:hover { border-color: var(--accent-green); box-shadow: 0 6px 20px rgba(0,255,102,0.3); background: rgba(0,255,102,0.08); }
+
+        .launch-card.gold { border-color: rgba(241,196,15,0.45); }
+        .launch-card.gold:hover { border-color: var(--accent-gold); box-shadow: 0 6px 20px rgba(241,196,15,0.3); background: rgba(241,196,15,0.08); }
+
+        .card-icon-box { 
+            font-size: 26px; width: 48px; height: 48px; background: rgba(0,0,0,0.6); 
+            border-radius: 12px; display: flex; align-items: center; justify-content: center; 
+            border: 1.5px solid rgba(255,255,255,0.15); flex-shrink: 0;
+        }
+        .card-info { flex: 1; margin-left: 12px; }
+        .card-title { font-size: 12px; font-weight: 900; color: var(--text-main); text-transform: uppercase; }
+        .card-desc { font-size: 9px; color: var(--text-muted); margin-top: 3px; line-height: 1.25; }
+        .card-arrow { font-size: 16px; font-weight: bold; color: var(--accent-cyan); padding-left: 8px; }
+
+        .footer-status { background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 7px; text-align: center; font-size: 8.5px; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+    <div class="app-frame">
+        <!-- एक्सपेंसिव हेडर -->
+        <div class="expansive-header">
+            <div class="header-title">⚡ ELECTRIC BODYGUARD : MASTER COMMAND CENTER ⚡</div>
+            <div class="header-subtitle">📍 पिन-कोड ब्रांड रेटिंग: तहसील स्तर (4.9 ⭐) • GST/CST Certified</div>
+        </div>
+
+        <div class="running-marquee-box">
+            <marquee scrollamount="4">🚀 असद AI ऑटोनॉमस हाइब्रिड इंजन सक्रिय • मल्टी-कैटेगरी डेटाबेस लिंक्ड • पर्यावरण सुरक्षा मिशन जारी 🌱</marquee>
+        </div>
+
+        <!-- लाइव स्टेटिस्टिक्स (लोकल स्टोरेज से डेटा) -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="stat-val" id="homeTreesCount">14</div>
+                <div class="stat-lbl">🌳 पेड़ सुरक्षित</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val">4.9 ⭐</div>
+                <div class="stat-lbl">⭐ ट्रस्ट रेटिंग</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-val" id="homeBillsCount">0</div>
+                <div class="stat-lbl">📦 कुल बिल</div>
+            </div>
+        </div>
+
+        <div class="launchpad-grid">
+            <!-- 1. मुख्य POS कैलकुलेटर -->
+            <a href="calculator_lock.html" class="launch-card green">
+                <div class="card-icon-box">🧮</div>
+                <div class="card-info">
+                    <div class="card-title" style="color: var(--accent-green);">ऑटोनॉमस POS कैलकुलेटर</div>
+                    <div class="card-desc">मुख्य बिलिंग, वॉइस कमांड, और लेजर मैनेजमेंट सिस्टम</div>
+                </div>
+                <div class="card-arrow" style="color: var(--accent-green);">➔</div>
+            </a>
+
+            <!-- 2. बिजनेस डीएनए सेटअप -->
+            <a href="business-setup.html" class="launch-card">
+                <div class="card-icon-box">⚙️</div>
+                <div class="card-info">
+                    <div class="card-title" style="color: var(--accent-cyan);">बिजनेस डीएनए सेटअप</div>
+                    <div class="card-desc">दुकान का नाम, ब्रांड लोगो, और मल्टी-कैटेगरी टैक्स पैरामीटर</div>
+                </div>
+                <div class="card-arrow">➔</div>
+            </a>
+
+            <!-- 3. व्यापार फीड & नेटवर्क -->
+            <a href="feed_biz.html" class="launch-card gold">
+                <div class="card-icon-box">🌐</div>
+                <div class="card-info">
+                    <div class="card-title" style="color: var(--accent-gold);">व्यापार फीड & नेटवर्क</div>
+                    <div class="card-desc">लोकल मार्केट अपडेट और असद शोविंग नेटवर्क</div>
+                </div>
+                <div class="card-arrow" style="color: var(--accent-gold);">➔</div>
+            </a>
+        </div>
+
+        <div class="footer-status">
+            🔒 6256-Crypto Secure | Offline-First Hybrid Core (Asad AI)
+        </div>
+    </div>
+
+    <script>
+        // --- मास्टर हाइब्रिड इंजन & डेटा सिंक्रोनाइजेशन लॉजिक ---
+        const MasterCoreEngine = {
+            categories: {
+                kirana: { tax: 0, name: "किराना" },
+                pharmacy: { tax: 5, name: "मेडिसिन" },
+                hardware: { tax: 18, name: "हार्डवेयर" },
+                dhaba: { tax: 5, name: "ढाबा" },
+                garments: { tax: 5, name: "कपड़ा" }
+            },
+
+            initDashboard() {
+                // लोकल स्टोरेज से बिल और पेड़ सुरक्षित के आंकड़े लोड करना
+                let savedBills = JSON.parse(localStorage.getItem('rizwan_pos_bills') || '[]');
+                let billsEl = document.getElementById('homeBillsCount');
+                if(billsEl) billsEl.innerText = savedBills.length;
+
+                let trees = localStorage.getItem('rizwan_trees_saved') || '14';
+                let treesEl = document.getElementById('homeTreesCount');
+                if(treesEl) treesEl.innerText = trees;
+
+                console.log("⚡ असद AI मास्टर कमांड सेंटर सफलताપर्वक लोड हो गया है।");
+            }
+        };
+
+        // पेज लोड होते ही इंजन एक्टिव करना
+        window.onload = function() {
+            MasterCoreEngine.initDashboard();
+        };
+    </script>
+</body>
+</html>
