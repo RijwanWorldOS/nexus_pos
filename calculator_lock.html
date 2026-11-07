@@ -529,8 +529,9 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                         <div style="font-size:10px; color:var(--accent-green); margin-top:3px;">₹${item.price}</div>
                     </div>`;
             });
-        
-                    function updateItem(index, type, val) {
+        }
+
+        function updateItem(index, type, val) {
 
         
             if (type === 'qty') { let q = parseInt(val); if (!isNaN(q) && q > 0) { billItems[index].qty = q; billItems[index].total = q * billItems[index].unitPrice; } }
