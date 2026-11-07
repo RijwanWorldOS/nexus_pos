@@ -390,11 +390,22 @@
             }
         }
 
-        function speakAiMessage(text) {
-            if (!isAiVoiceActive) return;
-            if ('speechSynthesis' in window) {
-                try {
-                 // ============================================
+       function speakAiMessage(text) {
+    if (!isAiVoiceActive) return;
+
+    if ('speechSynthesis' in window) {
+        try {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = currentAppLang || 'hi-IN';
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
+        } catch (error) {
+            console.error("Voice Error:", error);
+        }
+    }
+}
+
+// ============================================
 // PRODUCT DNA - LOCAL PRODUCT DATABASE
 // ============================================
 
@@ -421,63 +432,64 @@ function saveProductDNA(database) {
 // ============================================
 
 function addItem(name, qty, weight, quality, price, productMeta = null) {
-
-    let barcode = productMeta && productMeta.barcode
+    const barcode = productMeta && productMeta.barcode
         ? String(productMeta.barcode)
         : "";
 
-    let existing = billItems.find(item => {
-        if (barcode) {
-            return item.barcode === barcode;
-        }
+    const quantity = Number(qty);
+    const unitPrice = Number(price);
 
-        return !item.barcode && item.name === name;
-    });
+    if (!name || !Number.isFinite(quantity) || quantity <= 0 ||
+        !Number.isFinite(unitPrice) || unitPrice < 0) {
+        alert("सामान, मात्रा और कीमत सही दर्ज करें।");
+        return;
+    }
+
+    let existing = billItems.find(item =>
+        barcode ? item.barcode === barcode :
+        (!item.barcode && item.name === name)
+    );
 
     if (barcode) {
-        let database = loadProductDNA();
-        let product = database[barcode];
+        const database = loadProductDNA();
+        const product = database[barcode];
 
         if (!product) {
             alert("यह बारकोड Product DNA में सेव नहीं है।");
             return;
         }
 
-        let alreadyInBill = billItems
+        const alreadyInBill = billItems
             .filter(item => item.barcode === barcode)
-            .reduce((sum, item) => sum + item.qty, 0);
+            .reduce((sum, item) => sum + Number(item.qty || 0), 0);
 
-        if (product.stock - alreadyInBill < qty) {
-            alert(
-                "स्टॉक पर्याप्त नहीं है। उपलब्ध स्टॉक: " +
-                Math.max(0, product.stock - alreadyInBill)
-            );
+        if (Number(product.stock) - alreadyInBill < quantity) {
+            alert("स्टॉक पर्याप्त नहीं है। उपलब्ध स्टॉक: " +
+                Math.max(0, Number(product.stock) - alreadyInBill));
             return;
         }
     }
 
     if (existing) {
-        existing.qty += qty;
+        existing.qty += quantity;
         existing.total = existing.qty * existing.unitPrice;
     } else {
         billItems.push({
             name: name,
-            qty: qty,
+            qty: quantity,
             weight: weight,
             quality: quality,
-            unitPrice: price,
-            total: price * qty,
+            unitPrice: unitPrice,
+            total: unitPrice * quantity,
             barcode: barcode,
             description: productMeta ? productMeta.description : "",
-            productId: barcode || ""
+            productId: barcode
         });
     }
 
     renderLedger();
-}   
-                } catch(e) {}
-            }
-        }
+} 
+
 
         function toggleContinuousVoice() {
             let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
