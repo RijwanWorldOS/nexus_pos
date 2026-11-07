@@ -530,18 +530,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                     </div>`;
             });
         
-            if (!itemName || isNaN(itemPrice) || itemPrice <= 0) { alert("⚠️ सही नाम और मूल्य दें!"); return; }
-            addItem(itemName, 1, "1 Unit", "Standard", itemPrice);
-            nameInput.value = ""; priceInput.value = "";
-            speakAiMessage(`${itemName} नया सामान जोड़ दिया गया है!`);
-        }
-
-        function addItem(name, qty, weight, quality, price) {
-            let existing = billItems.find(i => i.name === name);
-            if (existing) { existing.qty += qty; existing.total = existing.qty * existing.unitPrice; }
-            else { billItems.push({ name, qty, weight, quality, unitPrice: price, total: price * qty }); }
-            renderLedger();
-        }
+                    function updateItem(index, type, val) {
 
         function updateItem(index, type, val) {
             if (type === 'qty') { let q = parseInt(val); if (!isNaN(q) && q > 0) { billItems[index].qty = q; billItems[index].total = q * billItems[index].unitPrice; } }
