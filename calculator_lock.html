@@ -803,17 +803,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
             });
         }
 
-        function triggerSecretCoreModal() {
-            secretClicks++;
-            if (secretClicks >= 4) { let sm = document.getElementById('secretModal'); if(sm) sm.style.display = 'flex'; secretClicks = 0; }
-            setTimeout(() => secretClicks = 0, 3000);
-        }
-        function closeSecretModal() { let sm = document.getElementById('secretModal'); if(sm) sm.style.display = 'none'; }
-        function verifySecretPin() {
-            let pinVal = document.getElementById('secretPin').value;
-            if (pinVal === "12345") { alert("✅ मास्टर एडमिन एक्सेस सफल!"); closeSecretModal(); }
-            else { alert("❌ गलत पिन!"); closeSecretModal(); }
-        }
+        
 
         window.onload = function() {
             let savedBiz = JSON.parse(localStorage.getItem('rizwan_global_business_dna') || '{}');
