@@ -420,7 +420,93 @@ function saveProductDNA(database) {
         JSON.stringify(database)
     );
 }
+function saveScannedProduct() {
+    try {
+        const barcode = document.getElementById('dnaBarcode').value.trim();
+        const name = document.getElementById('dnaName').value.trim();
+        const description = document.getElementById('dnaDescription').value.trim();
 
+        const costRaw = document.getElementById('dnaCostPrice').value;
+        const saleRaw = document.getElementById('dnaSalePrice').value;
+        const stockRaw = document.getElementById('dnaStock').value;
+
+        const costPrice = Number(costRaw);
+        const salePrice = Number(saleRaw);
+        const stock = Number(stockRaw);
+
+        const unit = document.getElementById('dnaUnit').value.trim();
+
+        if (!barcode || !name || !unit ||
+            costRaw === '' || saleRaw === '' || stockRaw === '' ||
+            !Number.isFinite(costPrice) || costPrice < 0 ||
+            !Number.isFinite(salePrice) || salePrice <= 0 ||
+            !Number.isFinite(stock) || stock <= 0) {
+            alert("बारकोड, नाम, यूनिट, सही कीमत और उपलब्ध स्टॉक भरें।");
+            return;
+        }
+
+        const database = loadProductDNA();
+
+        if (Object.prototype.hasOwnProperty.call(database, barcode)) {
+            alert("यह बारकोड पहले से Product DNA में मौजूद है।");
+            return;
+        }
+
+        const product = {
+            barcode: barcode,
+            name: name,
+            description: description,
+            costPrice: costPrice,
+            salePrice: salePrice,
+            stock: stock,
+            unit: unit,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        database[barcode] = product;
+        saveProductDNA(database);
+
+        const savedDatabase = loadProductDNA();
+
+        if (!savedDatabase[barcode]) {
+            throw new Error("Product DNA सेव होने की पुष्टि नहीं हुई।");
+        }
+
+        addItem(
+            product.name,
+            1,
+            product.unit,
+            "Standard",
+            product.salePrice,
+            {
+                barcode: product.barcode,
+                description: product.description
+            }
+        );
+
+        const panel = document.getElementById('scannerRegisterPanel');
+        if (panel) panel.style.display = 'none';
+
+        document.getElementById('dnaBarcode').value = '';
+        document.getElementById('dnaName').value = '';
+        document.getElementById('dnaDescription').value = '';
+        document.getElementById('dnaCostPrice').value = '';
+        document.getElementById('dnaSalePrice').value = '';
+        document.getElementById('dnaStock').value = '';
+
+        const status = document.getElementById('scannerStatusText');
+        if (status) {
+            status.innerText = "Product DNA सेव हुआ और सामान बिल में जोड़ा गया।";
+        }
+
+        speakAiMessage("नया सामान Product DNA में सेव हो गया है।");
+
+    } catch (error) {
+        console.error("Product DNA Save Error:", error);
+        alert("Product सेव नहीं हुआ। कारण: " + error.message);
+    }
+}
 // ============================================
 // ADD ITEM - BARCODE AWARE BILL ENGINE
 // ============================================
