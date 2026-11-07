@@ -186,14 +186,74 @@
             <div style="flex:1; background:#040914; color:#fff; padding:10px; font-size:10px; overflow-y:auto;" id="crossCheckDetailsBox">मिलान हो रहा है...</div>
         </div>
 
-        <div class="modal-view-screen" id="screenLiveScanner">
-            <div class="modal-header-banner">⚡ 1000X VISION & HTML PAY HTML SCANNER ⚡</div>
-            <div style="flex:1; background:#000; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; gap:10px;">
-                <video id="scannerVideo" autoplay playsinline style="width:100%; height:75%; object-fit:cover;"></video>
-                <div style="color:var(--accent-green); font-size:9.5px; text-align:center;" id="scannerStatusText">QR / HTML Pay स्कैन हो रहा है...</div>
-                <button class="action-btn-clear" onclick="closeLiveCameraScanner()" style="width:80%;">बंद करें</button>
-            </div>
+       <div class="modal-view-screen" id="screenLiveScanner">
+    <div class="modal-header-banner">📷 PRODUCT DNA BARCODE SCANNER</div>
+
+    <div style="background:#000; padding:5px; border-radius:8px;">
+        <video id="scannerVideo" autoplay playsinline
+            style="width:100%; height:210px; object-fit:cover;"></video>
+    </div>
+
+    <div id="scannerStatusText"
+        style="color:var(--accent-green); font-size:11px; text-align:center; padding:5px;">
+        कैमरा शुरू होने की प्रतीक्षा...
+    </div>
+
+    <div style="display:flex; gap:5px;">
+        <input id="scannerManualBarcode" type="text"
+            placeholder="बारकोड नंबर यहाँ लिखें"
+            style="flex:1; min-width:0; background:#030712; color:white; border:1px solid var(--accent-cyan); padding:8px; border-radius:5px;">
+        <button class="tool-btn" onclick="checkManualBarcode()">
+            जाँचें
+        </button>
+    </div>
+
+    <div id="scannerRegisterPanel"
+        style="display:none; background:#071120; border:1px solid var(--accent-green); border-radius:8px; padding:8px; gap:7px; flex-direction:column;">
+
+        <div style="color:var(--accent-green); font-weight:bold; font-size:12px;">
+            🧬 नया Product DNA बनाएँ
         </div>
+
+        <input id="dnaBarcode" readonly placeholder="बारकोड"
+            style="background:#030712; color:var(--accent-cyan); padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaName" placeholder="सामान का नाम"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaDescription" placeholder="सामान का काम / विवरण"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaCostPrice" type="number" min="0" step="0.01"
+            placeholder="खरीद मूल्य ₹"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaSalePrice" type="number" min="0.01" step="0.01"
+            placeholder="बिक्री मूल्य ₹"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaStock" type="number" min="0" step="1"
+            placeholder="अभी दुकान में कुल स्टॉक"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <input id="dnaUnit" type="text" placeholder="यूनिट: पीस, किलो, लीटर..."
+            value="पीस"
+            style="background:#030712; color:white; padding:7px; border:1px solid #555; border-radius:5px;">
+
+        <button class="action-btn-wide" onclick="saveScannedProduct()">
+            💾 Product DNA सेव करें और बिल में जोड़ें
+        </button>
+
+        <button class="action-btn-clear" onclick="cancelProductRegistration()">
+            रद्द करें
+        </button>
+    </div>
+
+    <button class="action-btn-clear" onclick="closeLiveCameraScanner()"
+        style="width:100%;">
+        कैमरा बंद करें
+    </button>
+</div> 
 
         <div class="modal-view-screen" id="screenGallery">
             <div class="modal-header-banner">⚡ LEDGER GALLERY ⚡</div>
