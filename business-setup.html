@@ -474,56 +474,113 @@
         }
 
         function saveGlobalBusinessSetup() {
-            let bizName = document.getElementById('setupBizName').value.trim();
-            let pinCode = document.getElementById('setupPinCode').value.trim();
-            let ownerName = document.getElementById('setupOwnerName').value.trim() || "मालिक";
-            let phoneNum = document.getElementById('setupPhone').value.trim();
-            let emailAddr = document.getElementById('setupEmail').value.trim();
-            let sectorVal = document.getElementById('selectedSectorInput').value;
-            let logoStyle = document.getElementById('selectedLogoStyle').value;
-            let gpsData = document.getElementById('gpsCoordsInput').value;
-            let bioVerified = document.getElementById('biometricVerified').value;
+    const bizName = document.getElementById('setupBizName').value.trim();
+    const pinCode = document.getElementById('setupPinCode').value.trim();
+    const ownerName = document.getElementById('setupOwnerName').value.trim() || "मालिक";
+    const phoneInput = document.getElementById('setupPhone').value.trim();
+    const emailAddr = document.getElementById('setupEmail').value.trim();
+    const sectorVal = document.getElementById('selectedSectorInput').value;
+    const logoStyle = document.getElementById('selectedLogoStyle').value;
+    const gpsData = document.getElementById('gpsCoordsInput').value;
+    const taxProfile = document.getElementById('setupTaxSelect').value;
 
-            if (!bizName || !pinCode || !phoneNum) {
-                let err = "कृपया दुकान का नाम, पिन-कोड और मोबाइल नंबर दर्ज करें मालिक!";
-                alert(err);
-                speakAsad(err);
-                return;
-            }
+    if (!bizName || !pinCode || !phoneInput) {
+        alert("दुकान का नाम, पिनकोड और मोबाइल नंबर भरना जरूरी है।");
+        return;
+    }
 
-            if (bioVerified !== "true") {
-                let err = "सुरक्षा चेतावनी: पहले बायोमेट्रिक डीएनए स्कैन पूरा कीजिए मालिक!";
-                alert(err);
-                speakAsad(err);
-                return;
-            }
+    if (!/^[1-9][0-9]{5}$/.test(pinCode)) {
+        alert("कृपया सही 6 अंकों का भारतीय पिनकोड दर्ज करें।");
+        return;
+    }
 
-            let uniqueCryptoNodeId = 'EB-DNA-' + pinCode + '-' + Math.floor(100000 + Math.random() * 900000) + '-SEC9';
+    let phoneNum = phoneInput.replace(/\D/g, "");
 
-            let globalSetupData = {
-                cryptoNodeId: uniqueCryptoNodeId,
-                businessName: bizName,
-                pinCode: pinCode,
-                phone: phoneNum,
-                email: emailAddr,
-                sector: sectorVal,
-                owner: ownerName,
-                brandLogoStyle: logoStyle,
-                gpsLocation: gpsData,
-                biometricStatus: "Locked & Verified (Encrypted Local + Firebase Link)",
-                status: "100% Autonomous Global Locked"
-            };
+    if (phoneNum.length === 12 && phoneNum.startsWith("91")) {
+        phoneNum = phoneNum.slice(2);
+    }
 
-            localStorage.setItem('rizwan_global_business_dna', JSON.stringify(globalSetupData));
-            
-            let successMsg = `बधाई हो ${ownerName}! क्रिप्टो डीएनए और पिन लोकेशन लॉक हो चुकी है। अब POS पर चलते हैं!`;
-            alert(`✅ Crypto-DNA & Map Location Locked!\n\nNode ID: [ ${uniqueCryptoNodeId} ]\nGPS: ${gpsData}`);
-            speakAsad(successMsg);
-            
-            setTimeout(() => {
-                window.location.href = "calculator_lock.html";
-            }, 1500);
+    if (!/^[6-9][0-9]{9}$/.test(phoneNum)) {
+        alert("कृपया सही 10 अंकों का भारतीय मोबाइल नंबर दर्ज करें।");
+        return;
+    }
+
+    if (emailAddr && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailAddr)) {
+        alert("कृपया सही ईमेल आईडी दर्ज करें।");
+        return;
+    }
+
+    if (!window.crypto || !window.crypto.getRandomValues) {
+        alert("सुरक्षित Node ID बनाने की सुविधा उपलब्ध नहीं है।");
+        return;
+    }
+
+    const randomBytes = new Uint8Array(16);
+    window.crypto.getRandomValues(randomBytes);
+
+    const randomId = Array.from(randomBytes)
+        .map(byte => byte.toString(16).padStart(2, "0"))
+        .join("");
+
+    const uniqueCryptoNodeId = "EB-DNA-" + pinCode + "-" + randomId;
+
+    const globalSetupData = {
+        schemaVersion: 2,
+        cryptoNodeId: uniqueCryptoNodeId,
+        businessName: bizName,
+        pinCode: pinCode,
+        phone: phoneNum,
+        email: emailAddr,
+        sector: sectorVal,
+        owner: ownerName,
+        brandLogoStyle: logoStyle,
+        taxProfile: taxProfile,
+        gpsLocation: gpsData || "",
+        biometricStatus: "not_implemented",
+        status: "saved_locally",
+        createdAt: new Date().toISOString()
+    };
+
+    try {
+        localStorage.setItem(
+            'rizwan_global_business_dna',
+            JSON.stringify(globalSetupData)
+        );
+
+        const savedData = localStorage.getItem(
+            'rizwan_global_business_dna'
+        );
+
+        if (!savedData) {
+            throw new Error("Save verification failed");
         }
+
+        const verifiedData = JSON.parse(savedData);
+
+        if (verifiedData.cryptoNodeId !== uniqueCryptoNodeId) {
+            throw new Error("Saved data verification failed");
+        }
+
+        alert(
+            "व्यवसाय की जानकारी इस डिवाइस के ब्राउज़र में सेव हो गई है।\n\n" +
+            "Node ID: " + uniqueCryptoNodeId + "\n\n" +
+            "ध्यान दें: यह अभी Firebase या Cloud पर सेव नहीं हुई है।"
+        );
+
+        speakAsad("आपकी दुकान की जानकारी इस डिवाइस में सफलतापूर्वक सेव हो गई है।");
+
+        setTimeout(function() {
+            window.location.href = "calculator_lock.html";
+        }, 1500);
+
+    } catch (error) {
+        console.error("Business setup save error:", error);
+        alert(
+            "जानकारी सेव नहीं हो सकी।\n" +
+            "ब्राउज़र की स्टोरेज अनुमति और उपलब्ध जगह जाँचें।"
+        );
+    }
+}
 
         window.onload = function() {
             renderSectorCards();
