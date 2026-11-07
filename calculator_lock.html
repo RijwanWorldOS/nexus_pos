@@ -506,6 +506,72 @@ function saveScannedProduct() {
         console.error("Product DNA Save Error:", error);
         alert("Product सेव नहीं हुआ। कारण: " + error.message);
     }
+}  function checkManualBarcode() {
+    try {
+        const input = document.getElementById('scannerManualBarcode');
+
+        if (!input) {
+            throw new Error("Barcode input field नहीं मिला।");
+        }
+
+        const barcode = input.value.trim();
+
+        if (!barcode) {
+            alert("पहले बारकोड नंबर दर्ज करें।");
+            input.focus();
+            return;
+        }
+
+        const database = loadProductDNA();
+        const product = database[barcode];
+
+        if (product) {
+            if (
+                !product.name ||
+                !Number.isFinite(Number(product.salePrice)) ||
+                !Number.isFinite(Number(product.stock)) ||
+                Number(product.stock) <= 0
+            ) {
+                alert("इस बारकोड का Product DNA रिकॉर्ड अधूरा है या स्टॉक खत्म है।");
+                return;
+            }
+
+            addItem(
+                product.name,
+                1,
+                product.unit || "पीस",
+                "Standard",
+                Number(product.salePrice),
+                {
+                    barcode: barcode,
+                    description: product.description || ""
+                }
+            );
+
+            return;
+        }
+
+        const barcodeField = document.getElementById('dnaBarcode');
+        const registerPanel = document.getElementById('scannerRegisterPanel');
+        const status = document.getElementById('scannerStatusText');
+
+        if (!barcodeField || !registerPanel) {
+            throw new Error("Product Registration Form नहीं मिला।");
+        }
+
+        barcodeField.value = barcode;
+        registerPanel.style.display = 'flex';
+
+        if (status) {
+            status.innerText = "नया बारकोड मिला। अब सामान की जानकारी भरें।";
+        }
+
+        document.getElementById('dnaName').focus();
+
+    } catch (error) {
+        console.error("Manual Barcode Check Error:", error);
+        alert("बारकोड जाँच में समस्या: " + error.message);
+    }
 }
 // ============================================
 // ADD ITEM - BARCODE AWARE BILL ENGINE
