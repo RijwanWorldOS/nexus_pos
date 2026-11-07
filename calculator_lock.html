@@ -529,12 +529,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                         <div style="font-size:10px; color:var(--accent-green); margin-top:3px;">₹${item.price}</div>
                     </div>`;
             });
-        }function addNewCustomCatalogItem() {
-            let nameInput = document.getElementById('newItemNameInput');
-            let priceInput = document.getElementById('newItemPriceInput');
-            if(!nameInput || !priceInput) return;
-            let itemName = nameInput.value.trim();
-            let itemPrice = parseFloat(priceInput.value);
+        
             if (!itemName || isNaN(itemPrice) || itemPrice <= 0) { alert("⚠️ सही नाम और मूल्य दें!"); return; }
             addItem(itemName, 1, "1 Unit", "Standard", itemPrice);
             nameInput.value = ""; priceInput.value = "";
