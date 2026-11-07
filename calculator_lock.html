@@ -783,7 +783,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
         }
 
         function closeModalScreens() {
-            ['screenGallery', 'screenAntiTheft', 'screenCreditModal', 'screenUpiQrModal', 'screenAiGuru', 'secretModal', 'screenLiveScanner', 'screenCatalogManager', 'screenCrossCheck', 'screenReport'].forEach(id => {
+            ['screenGallery', 'screenAntiTheft', 'screenCreditModal', 'screenUpiQrModal', 'screenAiGuru',  'screenLiveScanner', 'screenCatalogManager', 'screenCrossCheck', 'screenReport'].forEach(id => {
                 let el = document.getElementById(id);
                 if(el) el.style.display = 'none';
             });
