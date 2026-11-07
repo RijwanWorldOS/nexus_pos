@@ -83,9 +83,10 @@
             <marquee scrollamount="5">🌱 पर्यावरण सुरक्षा मिशन: 1 टन पेपर बचाने से 17 बड़े पेड़, 7000 गैलन पानी, बिजली और इंक की भारी बचत होती है! असद AI आपका डिजिटल रक्षक 🌳</marquee>
         </div>
 
-        <!-- स्टेटस बार (भाषा + वॉइस माइक + गूगल रेटिंग) -->
+        <!-- स्टेटस बार: वास्तविक कनेक्शन स्थिति -->
         <div class="status-bar">
-            <div><span class="online-dot"></span> P2P Mesh Secure</div>
+            <div>📱 Local Device Mode</div>
+
             <div class="lang-mic-box">
                 <select class="lang-select" id="appLanguageSelect" onchange="changeAppLanguage(this.value)">
                     <option value="hi">🇮🇳 हिंदी</option>
@@ -93,9 +94,15 @@
                     <option value="ur">🇵🇰 اردو</option>
                     <option value="ar">🇸🇦 العربية</option>
                 </select>
-                <button class="mic-btn" id="voiceMicBtn" onclick="toggleVoiceAssistant()" title="बोलेकर सेटअप करें (Voice Assistant)">🎙️ माइक</button>
+
+                <button class="mic-btn" id="voiceMicBtn" onclick="toggleVoiceAssistant()" title="बोलकर सेटअप करें (Voice Assistant)">
+                    🎙️ माइक
+                </button>
             </div>
-            <div style="color:var(--accent-gold); font-weight:bold;">⭐ 4.9 / 5.0</div>
+
+            <div style="color:var(--accent-gold); font-weight:bold;">
+                P2P: Not Connected
+            </div>
         </div>
 
         <div class="ai-guide-banner" id="aiDynamicWelcomeText" onclick="speakAsadWelcome()">
