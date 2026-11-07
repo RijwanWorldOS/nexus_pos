@@ -450,21 +450,17 @@
 } 
 
         function triggerAutoScan() {
-            let scanMsg = "विज़न कैमरा चालू है... दुकान का बोर्ड स्कैन हो रहा है!";
-            speakAsad(scanMsg);
+    const message =
+        "कैमरा आधारित OCR स्कैन सुविधा अभी जुड़ी नहीं है। " +
+        "आपकी दुकान की जानकारी अपने आप नहीं भरी गई है। " +
+        "कृपया जानकारी फॉर्म में दर्ज करें।";
 
-            setTimeout(() => {
-                document.getElementById('setupBizName').value = "रिज़वान ग्लोबल ऑटोनॉमस हब";
-                document.getElementById('setupPinCode').value = "110041";
-                document.getElementById('setupOwnerName').value = "रिज़वान भाई";
-                document.getElementById('setupPhone').value = "9876543210";
-                document.getElementById('setupEmail').value = "rizwan.global@hub.com";
-                
-                let doneMsg = "विज़न स्कैन सफल! डेटा अपने आप भर गया है मालिक!";
-                alert(doneMsg);
-                speakAsad(doneMsg);
-            }, 1200);
-        }
+    document.getElementById('aiDynamicWelcomeText').innerText =
+        "💬 " + message;
+
+    alert(message);
+    speakAsad(message);
+}
 
         function changeAppLanguage(lang) {
             let msgs = {
