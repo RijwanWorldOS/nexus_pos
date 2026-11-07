@@ -572,7 +572,40 @@ function saveScannedProduct() {
         console.error("Manual Barcode Check Error:", error);
         alert("बारकोड जाँच में समस्या: " + error.message);
     }
-}
+} 
+       function cancelProductRegistration() {
+    try {
+        const panel = document.getElementById('scannerRegisterPanel');
+
+        if (panel) {
+            panel.style.display = 'none';
+        }
+
+        const fields = [
+            'dnaBarcode',
+            'dnaName',
+            'dnaDescription',
+            'dnaCostPrice',
+            'dnaSalePrice',
+            'dnaStock'
+        ];
+
+        fields.forEach(id => {
+            const field = document.getElementById(id);
+            if (field) field.value = '';
+        });
+
+        const status = document.getElementById('scannerStatusText');
+
+        if (status) {
+            status.innerText = "Product रजिस्ट्रेशन रद्द किया गया।";
+        }
+
+    } catch (error) {
+        console.error("Product Registration Cancel Error:", error);
+        alert("रजिस्ट्रेशन बंद करने में समस्या: " + error.message);
+    }
+} 
 // ============================================
 // ADD ITEM - BARCODE AWARE BILL ENGINE
 // ============================================
