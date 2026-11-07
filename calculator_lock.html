@@ -532,7 +532,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
         
                     function updateItem(index, type, val) {
 
-        function updateItem(index, type, val) {
+        
             if (type === 'qty') { let q = parseInt(val); if (!isNaN(q) && q > 0) { billItems[index].qty = q; billItems[index].total = q * billItems[index].unitPrice; } }
             else if (type === 'price') { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { billItems[index].unitPrice = p; billItems[index].total = billItems[index].qty * p; } }
             else if (type === 'weight') { billItems[index].weight = val; }
