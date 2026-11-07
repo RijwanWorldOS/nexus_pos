@@ -435,18 +435,19 @@
             speakAsad(msg);
         }
 
-        function captureBiometricDNA() {
-            let promptMsg = "बायोमेट्रिक डीएनए स्कैन शुरू हो रहा है मालिक! कैमरा के सामने सीधे खड़े हो जाइए...";
-            document.getElementById('aiDynamicWelcomeText').innerText = `💬 "${promptMsg}"`;
-            speakAsad(promptMsg);
+       function captureBiometricDNA() {
+    document.getElementById('biometricVerified').value = "false";
 
-            setTimeout(() => {
-                document.getElementById('biometricVerified').value = "true";
-                let successMsg = "वाह मालिक! फेस और ऑडियो डीएनए का सैंपल सुरक्षित हो गया है!";
-                alert("🧬 बायोमेट्रिक डीएनए सफलतापूर्वक वेरीफाई और लॉक हो गया है!");
-                speakAsad(successMsg);
-            }, 2000);
-        }
+    const message =
+        "बायोमेट्रिक सत्यापन अभी इस संस्करण में जुड़ा नहीं है। " +
+        "इसलिए सिस्टम आपको नकली Verified स्थिति नहीं दिखाएगा।";
+
+    document.getElementById('aiDynamicWelcomeText').innerText =
+        "💬 " + message;
+
+    alert(message);
+    speakAsad(message);
+} 
 
         function triggerAutoScan() {
             let scanMsg = "विज़न कैमरा चालू है... दुकान का बोर्ड स्कैन हो रहा है!";
