@@ -334,18 +334,43 @@
                 document.getElementById('aiDynamicWelcomeText').innerText = `💬 "सुनाई दिया: ${speechResult}"`;
                 speakAsad(`आपने कहा: ${speechResult}। इसे सेट कर रहा हूँ मालिक!`);
 
-                // स्मार्ट वॉइस कमांड प्रोसेसिंग
-                if (speechResult.includes("नाम") || speechResult.includes("ओनर")) {
-                    document.getElementById('setupOwnerName').value = speechResult.replace(/नाम|ओनर/g, "").trim();
-                } else if (speechResult.includes("दुकान") || speechResult.includes("नाम")) {
-                    document.getElementById('setupBizName').value = speechResult;
-                } else if (speechResult.includes("पिन") || speechResult.includes("कोड")) {
-                    let numbers = speechResult.match(/\d+/);
-                    if(numbers) document.getElementById('setupPinCode').value = numbers[0];
-                } else if (speechResult.includes("मोबाइल") || speechResult.includes("नंबर")) {
-                    let numbers = speechResult.match(/\d+/);
-                    if(numbers) document.getElementById('setupPhone').value = numbers[0];
-                }
+              // स्मार्ट वॉइस कमांड प्रोसेसिंग
+                const command = speechResult.trim();
+
+                if (command.includes("दुकान")) {
+                    const shopName = command
+                        .replace(/दुकान का नाम|दुकान नाम|मेरी दुकान|दुकान/g, "")
+                        .trim();
+
+                    if (shopName) {
+                        document.getElementById('setupBizName').value = shopName;
+                    }
+
+                } else if (
+                    command.includes("मेरा नाम") ||
+                    command.includes("ओनर") ||
+                    command.includes("मालिक")
+                ) {
+                    const ownerName = command
+                        .replace(/मेरा नाम|ओनर|मालिक/g, "")
+                        .trim();
+
+                    if (ownerName) {
+                        document.getElementById('setupOwnerName').value = ownerName;
+                    }
+
+                } else if (command.includes("पिन") || command.includes("कोड")) {
+                    const numbers = command.match(/\d+/);
+                    if (numbers) {
+                        document.getElementById('setupPinCode').value = numbers[0];
+                    }
+
+                } else if (command.includes("मोबाइल") || command.includes("फोन")) {
+                    const numbers = command.match(/\d+/);
+                    if (numbers) {
+                        document.getElementById('setupPhone').value = numbers[0];
+                    }
+                }  
             };
 
             recognition.onerror = function() {
