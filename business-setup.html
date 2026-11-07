@@ -172,7 +172,7 @@
         <input type="hidden" id="selectedSectorInput" value="H01. Retail Kirana">
         <input type="hidden" id="selectedLogoStyle" value="⚡ [RIZWAN GLOBAL HUB] - SECURE P2P">
         <input type="hidden" id="biometricVerified" value="false">
-        <input type="hidden" id="gpsCoordsInput" value="28.6139° N, 77.2090° E">
+       <input type="hidden" id="gpsCoordsInput" value=""> 
 
         <div class="bottom-nav-bar">
             <a href="index.html" class="bot-btn" onclick="speakAsadAction('Home')">
@@ -379,20 +379,52 @@
         }
 
         function captureGPSLocation() {
-            let msg = "जीपीएस लोकेशन डिटेक्ट हो रही है मालिक... एक सेकंड रुकिए!";
-            document.getElementById('aiDynamicWelcomeText').innerText = `💬 "${msg}"`;
-            speakAsad(msg);
+    const status = document.getElementById('mapCoordsText');
+    const input = document.getElementById('gpsCoordsInput');
 
-            setTimeout(() => {
-                let mockCoords = "28.6139° N, 77.2090° E (Locked)";
-                document.getElementById('gpsCoordsInput').value = mockCoords;
-                document.getElementById('mapCoordsText').innerText = `GPS: ${mockCoords}`;
-                let success = "वाह मालिक! दुकान की सटीक पिन लोकेशन मैप रडार पर लॉक हो चुकी है!";
-                alert(success);
-                speakAsad(success);
-            }, 1200);
+    if (!navigator.geolocation) {
+        status.innerText = "इस ब्राउज़र में GPS उपलब्ध नहीं है";
+        alert("आपका ब्राउज़र GPS सपोर्ट नहीं करता।");
+        return;
+    }
+
+    if (!window.isSecureContext) {
+        status.innerText = "GPS के लिए सुरक्षित HTTPS कनेक्शन जरूरी है";
+        alert("GPS चलाने के लिए वेबसाइट HTTPS पर खोलें।");
+        return;
+    }
+
+    status.innerText = "GPS लोकेशन प्राप्त हो रही है...";
+    speakAsad("जीपीएस की अनुमति दीजिए। लोकेशन प्राप्त की जा रही है।");
+
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            const coords = latitude.toFixed(6) + ", " + longitude.toFixed(6);
+            input.value = coords;
+            status.innerText = "GPS: " + coords;
+
+            speakAsad("आपकी लोकेशन सफलतापूर्वक प्राप्त हो गई है।");
+        },
+        function(error) {
+            let message = "GPS लोकेशन प्राप्त नहीं हुई।";
+
+            if (error.code === 1) message = "लोकेशन की अनुमति नहीं मिली।";
+            if (error.code === 2) message = "डिवाइस की लोकेशन उपलब्ध नहीं है।";
+            if (error.code === 3) message = "GPS अनुरोध का समय समाप्त हो गया।";
+
+            status.innerText = message;
+            alert(message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
         }
-
+    );
+}
         function selectSectorCard(element, sectorKey, sectorName) {
             document.querySelectorAll('.selectable-card').forEach(c => c.classList.remove('active'));
             element.classList.add('active');
