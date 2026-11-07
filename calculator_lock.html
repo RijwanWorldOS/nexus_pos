@@ -394,12 +394,87 @@
             if (!isAiVoiceActive) return;
             if ('speechSynthesis' in window) {
                 try {
-                    window.speechSynthesis.cancel();
-                    let utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = currentAppLang;
-                    utterance.pitch = 1.1;
-                    utterance.rate = 1.0;
-                    window.speechSynthesis.speak(utterance);
+                 // ============================================
+// PRODUCT DNA - LOCAL PRODUCT DATABASE
+// ============================================
+
+function loadProductDNA() {
+    try {
+        return JSON.parse(
+            localStorage.getItem('rizwan_product_dna') || '{}'
+        );
+    } catch (error) {
+        console.error("Product DNA Read Error:", error);
+        return {};
+    }
+}
+
+function saveProductDNA(database) {
+    localStorage.setItem(
+        'rizwan_product_dna',
+        JSON.stringify(database)
+    );
+}
+
+// ============================================
+// ADD ITEM - BARCODE AWARE BILL ENGINE
+// ============================================
+
+function addItem(name, qty, weight, quality, price, productMeta = null) {
+
+    let barcode = productMeta && productMeta.barcode
+        ? String(productMeta.barcode)
+        : "";
+
+    let existing = billItems.find(item => {
+        if (barcode) {
+            return item.barcode === barcode;
+        }
+
+        return !item.barcode && item.name === name;
+    });
+
+    if (barcode) {
+        let database = loadProductDNA();
+        let product = database[barcode];
+
+        if (!product) {
+            alert("यह बारकोड Product DNA में सेव नहीं है।");
+            return;
+        }
+
+        let alreadyInBill = billItems
+            .filter(item => item.barcode === barcode)
+            .reduce((sum, item) => sum + item.qty, 0);
+
+        if (product.stock - alreadyInBill < qty) {
+            alert(
+                "स्टॉक पर्याप्त नहीं है। उपलब्ध स्टॉक: " +
+                Math.max(0, product.stock - alreadyInBill)
+            );
+            return;
+        }
+    }
+
+    if (existing) {
+        existing.qty += qty;
+        existing.total = existing.qty * existing.unitPrice;
+    } else {
+        billItems.push({
+            name: name,
+            qty: qty,
+            weight: weight,
+            quality: quality,
+            unitPrice: price,
+            total: price * qty,
+            barcode: barcode,
+            description: productMeta ? productMeta.description : "",
+            productId: barcode || ""
+        });
+    }
+
+    renderLedger();
+}   
                 } catch(e) {}
             }
         }
