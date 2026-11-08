@@ -1132,7 +1132,8 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
         
 
         window.onload = function() {
-            let savedBiz = JSON.parse(localStorage.getItem('rizwan_global_business_dna') || '{}');
+            initializeBusinessContext();
+let savedBiz = activeBusiness;
             if(savedBiz.brandLogoStyle) {
                 let hb = document.getElementById('billBrandLogoHeaderText');
                 if(hb) hb.innerText = savedBiz.brandLogoStyle;
