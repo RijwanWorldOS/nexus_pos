@@ -740,20 +740,90 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
             loadCatalogGridForManager(sector);
         }
 
-        function loadCatalogGridForManager(sector) {
-            let grid = document.getElementById('catalogItemsGrid');
-            if(!grid) return;
-            grid.innerHTML = "";
-            let items = worldBusinessDictionary[sector] || worldBusinessDictionary['kirana'];
-            items.forEach(item => {
-                let safeName = item.name.replace(/'/g, "\\'");
-                grid.innerHTML += `
-                    <div onclick="addItem('${safeName}', 1, '1 Unit', 'Standard', ${item.price}); closeModalScreens(); speakAiMessage('${item.name} जोड़ दिया गया है!');" style="background:#071120; border:1.5px solid rgba(0,243,255,0.4); padding:10px; border-radius:8px; cursor:pointer; text-align:center;">
-                        <div style="font-size:11px; font-weight:bold; color:var(--accent-cyan);">${item.name}</div>
-                        <div style="font-size:10px; color:var(--accent-green); margin-top:3px;">₹${item.price}</div>
-                    </div>`;
-            });
-        }
+       function loadCatalogGridForManager(sector) {
+    const grid = document.getElementById('catalogItemsGrid');
+    if (!grid) return;
+
+    grid.innerHTML = "";
+
+    // केवल इसी दुकान और सेक्टर का Product DNA पढ़ें
+    if (!activeShopId || !activeSectorId ||
+        sector !== activeSectorId) {
+        grid.textContent = "दुकान या सेक्टर की पहचान उपलब्ध नहीं है।";
+        return;
+    }
+
+    const database = loadProductDNA();
+
+    const items = Object.values(database).filter(product =>
+        product &&
+        typeof product.name === "string" &&
+        product.name.trim() !== "" &&
+        Number.isFinite(Number(product.salePrice)) &&
+        Number(product.salePrice) > 0 &&
+        Number.isFinite(Number(product.stock)) &&
+        Number(product.stock) >= 0
+    );
+
+    if (items.length === 0) {
+        grid.textContent =
+            "अभी इस दुकान के कैटलॉग में कोई प्रोडक्ट सेव नहीं है। पहले बारकोड स्कैन करके या मैनुअल तरीके से प्रोडक्ट दर्ज करें।";
+        return;
+    }
+
+    items.forEach(product => {
+        const card = document.createElement("div");
+
+        card.style.cssText =
+            "background:#071120;border:1.5px solid rgba(0,243,255,0.4);" +
+            "padding:10px;border-radius:8px;cursor:pointer;text-align:center;";
+
+        const name = document.createElement("div");
+        name.style.cssText =
+            "font-size:11px;font-weight:bold;color:var(--accent-cyan);";
+        name.textContent = product.name;
+
+        const price = document.createElement("div");
+        price.style.cssText =
+            "font-size:10px;color:var(--accent-green);margin-top:3px;";
+        price.textContent = "₹" + Number(product.salePrice).toFixed(2);
+
+        const stock = document.createElement("div");
+        stock.style.cssText =
+            "font-size:10px;color:#ffffff;margin-top:3px;";
+        stock.textContent =
+            "स्टॉक: " + Number(product.stock) + " " +
+            (product.unit || "Unit");
+
+        card.appendChild(name);
+        card.appendChild(price);
+        card.appendChild(stock);
+
+        card.addEventListener("click", function() {
+            if (Number(product.stock) <= 0) {
+                alert("इस प्रोडक्ट का स्टॉक खत्म है।");
+                return;
+            }
+
+            addItem(
+                product.name,
+                1,
+                product.unit || "Unit",
+                "Standard",
+                Number(product.salePrice),
+                {
+                    barcode: product.barcode,
+                    description: product.description || ""
+                }
+            );
+
+            closeModalScreens();
+            speakAiMessage(product.name + " बिल में जोड़ दिया गया है।");
+        });
+
+        grid.appendChild(card);
+    });
+} 
 
         function updateItem(index, type, val) {
 
