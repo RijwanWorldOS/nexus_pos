@@ -925,7 +925,7 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
         }
         function closeUpiQrModal() { let modal = document.getElementById('screenUpiQrModal'); if(modal) modal.style.display = 'none'; }
 
-        // REAL CAMERA BARCODE SCANNER
+        // ZXING CAMERA BARCODE SCANNER
         async function openLiveCameraScannerModal() {
             const screen = document.getElementById('screenLiveScanner');
             const video = document.getElementById('scannerVideo');
@@ -936,155 +936,100 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                 return;
             }
 
+            if (!window.ZXingBrowser ||
+                !window.ZXingBrowser.BrowserMultiFormatReader) {
+                status.innerText = "ZXing लाइब्रेरी लोड नहीं हुई। पेज रीफ्रेश करें।";
+                return;
+            }
+
+            closeLiveCameraScanner(false);
             screen.style.display = 'flex';
 
-            // पुराने कैमरा सेशन को बंद करें
-            closeLiveCameraScanner(false);
-
-            if (!navigator.mediaDevices ||
-                !navigator.mediaDevices.getUserMedia) {
-                status.innerText = "इस ब्राउज़र में कैमरा उपलब्ध नहीं है। HTTPS या localhost पर खोलें।";
-                return;
-            }
-
-            if (!('BarcodeDetector' in window)) {
-                status.innerText = "इस ब्राउज़र में BarcodeDetector समर्थित नहीं है। अभी ऊपर मैनुअल बारकोड दर्ज कर सकते हैं।";
-                return;
-            }
-
             try {
-                const supportedFormats =
-                    await BarcodeDetector.getSupportedFormats();
-
-                const wantedFormats = [
-                    'ean_13',
-                    'ean_8',
-                    'upc_a',
-                    'upc_e',
-                    'code_128',
-                    'code_39',
-                    'itf',
-                    'qr_code'
-                ];
-
-                const formats = wantedFormats.filter(
-                    format => supportedFormats.includes(format)
-                );
-
-                window.__rizwanBarcodeDetector = formats.length
-                    ? new BarcodeDetector({ formats })
-                    : new BarcodeDetector();
-
                 status.innerText = "कैमरा अनुमति माँगी जा रही है...";
 
-                window.__rizwanScannerStream =
-                    await navigator.mediaDevices.getUserMedia({
-                        audio: false,
-                        video: {
-                            facingMode: { ideal: "environment" }
+                const reader = new ZXingBrowser.BrowserMultiFormatReader();
+                window.__rizwanZXingReader = reader;
+                window.__rizwanScannerHandled = false;
+
+                const controls = await reader.decodeFromVideoDevice(
+                    undefined,
+                    video,
+                    (result, error, callbackControls) => {
+                        if (!result || window.__rizwanScannerHandled) return;
+
+                        const barcode = result.getText().trim();
+                        if (!barcode) return;
+
+                        window.__rizwanScannerHandled = true;
+
+                        const activeControls =
+                            callbackControls || window.__rizwanScannerControls;
+
+                        if (activeControls) activeControls.stop();
+
+                        window.__rizwanScannerControls = null;
+
+                        if (video.srcObject) {
+                            video.srcObject.getTracks().forEach(track => track.stop());
+                            video.srcObject = null;
                         }
-                    });
 
-                video.srcObject = window.__rizwanScannerStream;
-                await video.play();
+                        const input = document.getElementById('scannerManualBarcode');
+                        if (input) input.value = barcode;
 
-                window.__rizwanScannerActive = true;
-                status.innerText = "कैमरा चालू है। बारकोड को कैमरे के सामने रखें।";
+                        status.innerText = "बारकोड पढ़ लिया गया: " + barcode;
 
-                const scanFrame = async () => {
-                    if (!window.__rizwanScannerActive) return;
-
-                    try {
-                        if (video.readyState >= 2) {
-                            const results =
-                                await window.__rizwanBarcodeDetector.detect(video);
-
-                            if (results.length > 0 && results[0].rawValue) {
-                                const barcode = results[0].rawValue.trim();
-
-                                window.__rizwanScannerActive = false;
-
-                                if (window.__rizwanScannerStream) {
-                                    window.__rizwanScannerStream
-                                        .getTracks()
-                                        .forEach(track => track.stop());
-
-                                    window.__rizwanScannerStream = null;
-                                }
-
-                                video.srcObject = null;
-
-                                const input = document.getElementById(
-                                    'scannerManualBarcode'
-                                );
-
-                                if (input) {
-                                    input.value = barcode;
-                                }
-
-                                status.innerText =
-                                    "बारकोड पढ़ लिया गया: " + barcode;
-
-                                checkManualBarcode();
-                                return;
-                            }
-                        }
-                    } catch (scanError) {
-                        console.error("Barcode Detection Error:", scanError);
+                        checkManualBarcode();
                     }
+                );
 
-                    if (window.__rizwanScannerActive) {
-                        window.__rizwanScannerFrame =
-                            requestAnimationFrame(scanFrame);
-                    }
-                };
+                window.__rizwanScannerControls = controls;
 
-                window.__rizwanScannerFrame =
-                    requestAnimationFrame(scanFrame);
+                status.innerText =
+                    "कैमरा चालू है। बारकोड को कैमरे के सामने रखें।";
 
             } catch (error) {
                 closeLiveCameraScanner(false);
 
-                status.innerText =
-                    "कैमरा शुरू नहीं हुआ: " + error.message;
+                status.innerText = "कैमरा शुरू नहीं हुआ: " + error.message;
 
                 alert(
-                    "कैमरा चालू नहीं हो सका। कैमरा अनुमति दें और वेबसाइट HTTPS पर खोलें।\n" +
+                    "कैमरा चालू नहीं हो सका। अनुमति और HTTPS जाँचें।\n" +
                     error.message
                 );
 
-                console.error("Camera Start Error:", error);
+                console.error("ZXing Camera Error:", error);
             }
         }
 
         function closeLiveCameraScanner(hideScreen = true) {
-            window.__rizwanScannerActive = false;
+            window.__rizwanScannerHandled = true;
 
-            if (window.__rizwanScannerFrame) {
-                cancelAnimationFrame(window.__rizwanScannerFrame);
-                window.__rizwanScannerFrame = null;
-            }
-
-            if (window.__rizwanScannerStream) {
-                window.__rizwanScannerStream
-                    .getTracks()
-                    .forEach(track => track.stop());
-
-                window.__rizwanScannerStream = null;
+            if (window.__rizwanScannerControls) {
+                window.__rizwanScannerControls.stop();
+                window.__rizwanScannerControls = null;
             }
 
             const video = document.getElementById('scannerVideo');
 
             if (video) {
                 video.pause();
-                video.srcObject = null;
+
+                if (video.srcObject) {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.srcObject = null;
+                }
             }
+
+            window.__rizwanZXingReader = null;
 
             if (hideScreen) {
                 const screen = document.getElementById('screenLiveScanner');
                 if (screen) screen.style.display = 'none';
             }
         }
+            
     
 
         function toggleChatVoiceInput() {
