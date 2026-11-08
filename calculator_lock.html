@@ -451,7 +451,7 @@ function productDnaStorageKey() {
 function loadProductDNA() {
     try {
         return JSON.parse(
-            localStorage.getItem('rizwan_product_dna') || '{}'
+        localStorage.getItem(productDnaStorageKey()) || '{}'    
         );
     } catch (error) {
         console.error("Product DNA Read Error:", error);
