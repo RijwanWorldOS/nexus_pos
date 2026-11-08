@@ -305,8 +305,50 @@
         
         let isAiVoiceActive = true;
         let treesSaved = parseInt(localStorage.getItem('rizwan_trees_saved') || '14');
-        let currentSector = "kirana";
-        let currentAppLang = "hi-IN";
+        let currentSector = "H01";
+let activeBusiness = {};
+let activeSectorId = "H01";
+let activeShopId = "unregistered-shop";
+let currentAppLang = "hi-IN";
+
+const supportedSectorIds = {
+    H01: "किराना",
+    H02: "मेडिकल",
+    H03: "रेस्टोरेंट",
+    H04: "कपड़े",
+    H05: "हार्डवेयर",
+    H06: "ठेला / वेंडर",
+    H10: "कॉस्मेटिक्स",
+    H11: "इलेक्ट्रॉनिक्स / मोबाइल",
+    H21: "डेयरी",
+    H23: "स्टेशनरी"
+};
+
+function initializeBusinessContext() {
+    try {
+        activeBusiness = JSON.parse(
+            localStorage.getItem('rizwan_global_business_dna') || '{}'
+        );
+    } catch (error) {
+        activeBusiness = {};
+    }
+
+    const match = String(activeBusiness.sector || '').match(/H\d{2}/i);
+
+    activeSectorId = match ? match[0].toUpperCase() : '';
+    activeShopId = String(activeBusiness.cryptoNodeId || '').trim()
+        || 'unregistered-shop';
+
+    currentSector = activeSectorId || '';
+
+    if (!activeSectorId || !supportedSectorIds[activeSectorId]) {
+        console.warn("Business sector is not supported yet:", activeBusiness.sector);
+    }
+}
+
+function productDnaStorageKey() {
+    return 'rizwan_product_dna_v2_' + activeShopId + '_' + activeSectorId;
+}
 
         const worldBusinessDictionary = {
             kirana: [
