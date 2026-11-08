@@ -461,7 +461,7 @@ function loadProductDNA() {
 
 function saveProductDNA(database) {
     localStorage.setItem(
-        'rizwan_product_dna',
+       productDnaStorageKey(), 
         JSON.stringify(database)
     );
 }
