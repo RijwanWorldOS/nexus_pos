@@ -1088,23 +1088,35 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
             }
         }
 
-        // असद AI नाइट क्लोजिंग ऑडिट (रात को दुकान बंद करते समय कच्चा चिट्ठा)
+       // दुकान के हिसाब से नाइट क्लोजिंग ऑडिट
         function triggerNightClosingAudit() {
-            let savedBills = JSON.parse(localStorage.getItem('rizwan_pos_bills') || "[]");
-            let totalRevenue = savedBills.reduce((sum, bill) => sum + bill.total, 0);
+            let savedBills = loadShopJSON('rizwan_pos_bills', []);
+
+            let totalRevenue = savedBills.reduce(
+                (sum, bill) => sum + (Number(bill.total) || 0),
+                0
+            );
+
             let totalBillsCount = savedBills.length;
-            
-            let closingMsg = `रात हो गई है मालिक! आज का कच्चा चिट्ठा सुन लीजिए। कुल ${totalBillsCount} बिल कटे हैं, और आज की कुल कमाई ${totalRevenue} रुपये रही है। स्टॉक और माल की मांग बिल्कुल ठीक है। कल सुबह समय पर दुकान खोलेंगे और नए ग्राहकों पर फोकस करेंगे! शुभ रात्रि!`;
-            
-            alert(`📊 [ NIGHT CLOSING AUDIT - ASAD AI ]\n\nकुल बिल कटे: ${totalBillsCount}\nकुल कमाई: ₹${totalRevenue}\n\n"सभी डेटा लोकल और एनक्रिप्टेड फायरबेस पर सुरक्षित है।"`);
-            
-            if('speechSynthesis' in window) {
+
+            let closingMsg = `मालिक! इस दुकान में कुल ${totalBillsCount} बिल सेव हैं और उनकी कुल बिक्री ${totalRevenue} रुपये है। शुभ रात्रि!`;
+
+            alert(
+                `📊 [ NIGHT CLOSING AUDIT - ASAD AI ]\n\n` +
+                `कुल सेव बिल: ${totalBillsCount}\n` +
+                `कुल बिक्री: ₹${totalRevenue}\n\n` +
+                `डेटा इस डिवाइस के दुकान-विशिष्ट लोकल स्टोरेज में सेव है।`
+            );
+
+            if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
+
                 let voiceSummary = new SpeechSynthesisUtterance(closingMsg);
                 voiceSummary.lang = 'hi-IN';
+
                 window.speechSynthesis.speak(voiceSummary);
             }
-        }
+        } 
 
         function saveCctvDnaLink() {
             let linkInput = document.getElementById('cctvIpInput');
