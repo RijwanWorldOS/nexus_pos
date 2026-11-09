@@ -117,7 +117,7 @@
                 </div>
                 <div class="form-group">
                     <label>📍 पिन-कोड:</label>
-                    <input type="text" id="setupPinCode" placeholder="जैसे: 110041..." onfocus="guideField('pincode')">
+                    <input type="text" id="setupPinCode" maxlength="6" inputmode="numeric" placeholder="6 अंकों का PIN कोड" onfocus="guideField('pincode')" oninput="handlePincodeInput(this.value)">
                 </div>
             </div>
 
