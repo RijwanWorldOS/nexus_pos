@@ -600,6 +600,23 @@ const businessModel = document.getElementById('businessModel').value;
         return;
     }
 
+    // पुरानी दुकान की ID सुरक्षित रखें
+let uniqueCryptoNodeId = "";
+
+try {
+    const previousSetup = JSON.parse(
+        localStorage.getItem('rizwan_global_business_dna') || '{}'
+    );
+
+    uniqueCryptoNodeId = String(
+        previousSetup.cryptoNodeId || ''
+    ).trim();
+} catch (error) {
+    console.warn("पुराना Business DNA पढ़ने में समस्या:", error);
+}
+
+// केवल पहली बार ID नहीं मिलने पर नई ID बनाएँ
+if (!uniqueCryptoNodeId) {
     if (!window.crypto || !window.crypto.getRandomValues) {
         alert("सुरक्षित Node ID बनाने की सुविधा उपलब्ध नहीं है।");
         return;
@@ -612,7 +629,8 @@ const businessModel = document.getElementById('businessModel').value;
         .map(byte => byte.toString(16).padStart(2, "0"))
         .join("");
 
-    const uniqueCryptoNodeId = "EB-DNA-" + pinCode + "-" + randomId;
+    uniqueCryptoNodeId = "EB-DNA-" + pinCode + "-" + randomId;
+}
 
     const globalSetupData = {
         schemaVersion: 2,
