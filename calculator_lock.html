@@ -340,7 +340,33 @@ const supportedSectorIds = {
     H21: "डेयरी",
     H23: "स्टेशनरी"
 };
+function filterCatalogTabsForBusiness() {
+    const tabContainer = document.getElementById('catalogCategoryTabs');
+    const label = document.getElementById('activeCatalogCategoryLabel');
 
+    if (!tabContainer) return;
+
+    const tabs = tabContainer.querySelectorAll('[data-sector-id]');
+    let visibleTabs = 0;
+
+    tabs.forEach(function(tab) {
+        const isSelected = tab.dataset.sectorId === activeSectorId;
+
+        tab.style.display = isSelected ? 'inline-block' : 'none';
+
+        if (isSelected) {
+            visibleTabs++;
+        }
+    });
+
+    tabContainer.style.display = visibleTabs > 0 ? 'flex' : 'none';
+
+    if (label) {
+        label.textContent = '📂 ' +
+            (supportedSectorIds[activeSectorId] || 'चुनी हुई कैटेगरी') +
+            ' का कैटलॉग';
+    }
+}
 function initializeBusinessContext() {
     try {
         activeBusiness = JSON.parse(
