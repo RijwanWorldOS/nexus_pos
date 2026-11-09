@@ -394,7 +394,42 @@ function initializeBusinessContext() {
 function productDnaStorageKey() {
     return 'rizwan_product_dna_v2_' + activeShopId + '_' + activeSectorId;
 }
+// ============================================
+// SHOP-WISE LOCAL STORAGE
+// ============================================
 
+function shopStorageKey(baseKey) {
+    return baseKey + '_' + encodeURIComponent(activeShopId);
+}
+
+function loadShopJSON(baseKey, fallbackValue) {
+    try {
+        const saved = localStorage.getItem(shopStorageKey(baseKey));
+
+        if (saved === null) {
+            return fallbackValue;
+        }
+
+        return JSON.parse(saved);
+    } catch (error) {
+        console.error("Shop Storage Read Error:", baseKey, error);
+        return fallbackValue;
+    }
+}
+
+function saveShopJSON(baseKey, data) {
+    try {
+        localStorage.setItem(
+            shopStorageKey(baseKey),
+            JSON.stringify(data)
+        );
+        return true;
+    } catch (error) {
+        console.error("Shop Storage Save Error:", baseKey, error);
+        alert("डेटा सेव नहीं हुआ। ब्राउज़र की स्टोरेज जगह जाँचें।");
+        return false;
+    }
+}
         const worldBusinessDictionary = {
             kirana: [
                 {name: 'चीनी (1kg)', price: 45}, {name: 'सरसों तेल (1L)', price: 140}, {name: 'आटा (5kg)', price: 240},
