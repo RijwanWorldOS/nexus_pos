@@ -882,9 +882,7 @@
                     throw new Error('Business DNA डेटा सही फॉर्मेट में नहीं है।');
                 }
 
-                if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
-                    throw new Error('Saved Business DNA format is invalid');
-                }
+                
 
                 // सामान्य फॉर्म जानकारी वापस भरें
                 setSavedField('setupOwnerName', saved.owner);
