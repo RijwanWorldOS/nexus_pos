@@ -1032,8 +1032,12 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
             // डायनेमिक QR कोड और P2P शेयरिंग जनरेशन
             generateDynamicBillQR(billData);
 
-            treesSaved++;
-            localStorage.setItem('rizwan_trees_saved', treesSaved);
+          // इस दुकान का अपना Trees Saved काउंटर लोड करें
+    treesSaved = Number(loadShopJSON('rizwan_trees_saved', 14));
+
+    if (!Number.isFinite(treesSaved) || treesSaved < 0) {
+        treesSaved = 14;
+    }  
             let tEl = document.getElementById('treesSavedCount');
             if(tEl) tEl.innerText = treesSaved;
 
