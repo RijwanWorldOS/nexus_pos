@@ -384,6 +384,8 @@ function initializeBusinessContext() {
 
     currentSector = activeSectorId || '';
 
+    filterCatalogTabsForBusiness();
+
     if (!activeSectorId || !supportedSectorIds[activeSectorId]) {
         console.warn("Business sector is not supported yet:", activeBusiness.sector);
     }
