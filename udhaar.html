@@ -886,7 +886,7 @@ function saveSupplierPayment(){
 
   const nextEntries = entries.concat(entry);
 
-  if(!saveStorage(UDHAAR_KEY,nextEntries)){
+ if(!saveShopStorage(UDHAAR_KEY,nextEntries)){ 
     showStatus(
       "supplierMessage",
       "भुगतान सेव नहीं हुआ। Storage की जगह जाँचें।",
