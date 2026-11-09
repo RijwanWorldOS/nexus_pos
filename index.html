@@ -223,13 +223,22 @@
         };
     </script>
         <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js')
-        .then(() => console.log('Nexus POS Offline Mode Active!'))
-        .catch((err) => console.log('Service Worker Error:', err));
-    });
-  }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register(
+        './sw.js',
+        { updateViaCache: 'none' }
+      );
+
+      await registration.update();
+
+      console.log('Nexus POS Service Worker Update Checked');
+    } catch (error) {
+      console.error('Service Worker Error:', error);
+    }
+  });
+}
 </script>
 </body>
 </html>
