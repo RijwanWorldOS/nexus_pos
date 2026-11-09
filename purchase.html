@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS POS - Purchase</title>
+
+<style>
+:root{
+  --bg-primary:#030712;
+  --bg-card:#081423;
+  --accent-cyan:#00f3ff;
+  --accent-green:#00ff66;
+  --accent-gold:#f1c40f;
+  --accent-red:#ff3366;
+  --text:#e5f4ff;
+  --muted:#8ca5ba;
+  --border:#16445a;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg-primary);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+
+body{
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+}
+
+.app{
+  width:100%;
+  max-width:480px;
+  height:100vh;
+  height:100dvh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--bg-primary);
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+}
+
+.header{
+  flex-shrink:0;
+  padding:12px;
+  background:#050d19;
+  border-bottom:1px solid var(--accent-cyan);
+  box-shadow:0 2px 15px #00f3ff22;
+}
+
+.header h1{
+  margin:0;
+  color:var(--accent-cyan);
+  font-size:19px;
+  letter-spacing:1px;
+}
+
+.header small{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.nav{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding-bottom:3px;
+}
+
+.nav a{
+  flex-shrink:0;
+  color:var(--accent-cyan);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:7px 9px;
+  font-size:12px;
+}
+
+.nav a.active{
+  background:#06313a;
+  border-color:var(--accent-cyan);
+}
+
+.main-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  padding:12px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent-cyan) #07111d;
+}
+
+.container{
+  width:100%;
+  max-width:100%;
+  margin:0 auto;
+}
+
+.panel{
+  width:100%;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 0 12px #00f3ff0b;
+}
+
+.panel h2{
+  color:var(--accent-cyan);
+  font-size:14px;
+  margin:0 0 12px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+
+.field{
+  min-width:0;
+}
+
+.field.full{
+  grid-column:1/-1;
+}
+
+label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:5px;
+}
+
+input,select,textarea{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:10px 8px;
+  border:1px solid #1b465c;
+  border-radius:6px;
+  outline:none;
+  background:#030d19;
+  color:var(--text);
+  font-size:13px;
+}
+
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent-cyan);
+  box-shadow:0 0 7px #00f3ff33;
+}
+
+input[readonly]{
+  color:var(--accent-green);
+  background:#071923;
+}
+
+button{
+  border:0;
+  border-radius:6px;
+  padding:10px 12px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:12px;
+}
+
+.btn-green{
+  background:var(--accent-green);
+  color:#001b0b;
+}
+
+.btn-cyan{
+  background:var(--accent-cyan);
+  color:#001318;
+}
+
+.btn-red{
+  background:#401321;
+  color:#ff8ba5;
+  border:1px solid var(--accent-red);
+}
+
+.button-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-top:12px;
+}
+
+.product-scroll{
+  width:100%;
+  max-height:260px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  border:1px solid var(--border);
+  border-radius:7px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent-cyan) #07111d;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:560px;
+  font-size:12px;
+}
+
+th{
+  position:sticky;
+  top:0;
+  background:#10283a;
+  color:var(--accent-cyan);
+  text-align:left;
+  padding:10px 8px;
+  z-index:1;
+}
+
+td{
+  padding:9px 8px;
+  border-top:1px solid #173449;
+}
+
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:20px;
+}
+
+.summary{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+
+.stat{
+  min-width:0;
+  background:#061321;
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:10px 5px;
+  text-align:center;
+}
+
+.stat small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.stat strong{
+  display:block;
+  margin-top:6px;
+  color:var(--accent-green);
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+
+.total-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid #173449;
+  font-size:13px;
+}
+
+.total-line strong{
+  color:var(--accent-green);
+}
+
+.notice{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.5;
+  margin-top:8px;
+}
+
+.status{
+  font-size:12px;
+  margin-top:10px;
+  min-height:17px;
+}
+
+.status.ok{
+  color:var(--accent-green);
+}
+
+.status.error{
+  color:#ff718e;
+}
+
+.history-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+
+.history-row strong{
+  color:var(--accent-cyan);
+  font-size:13px;
+}
+
+.history-row small{
+  display:block;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+@media(max-width:380px){
+  .main-scroll{
+    padding:9px;
+  }
+
+  .panel{
+    padding:10px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .field.full{
+    grid-column:auto;
+  }
+
+  .summary{
+    grid-template-columns:1fr;
+  }
+
+  .header h1{
+    font-size:17px;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header class="header">
+  <h1>⚡ NEXUS POS · PURCHASE</h1>
+  <small>Purchase & Supplier Management</small>
+
+  <nav class="nav">
+    <a href="index.html">Dashboard</a>
+    <a href="calculator_lock.html">Billing</a>
+    <a href="inventory.html">Inventory</a>
+    <a class="active" href="purchase.html">Purchase</a>
+  </nav>
+</header>
+
+<main class="main-scroll">
+<div class="container">
+
+<section class="panel">
+  <h2>📦 SUPPLIER & PURCHASE DETAILS</h2>
+
+  <div class="grid">
+    <div class="field">
+      <label>Supplier का नाम *</label>
+      <input id="supplierName" list="supplierSuggestions" placeholder="Supplier का नाम">
+      <datalist id="supplierSuggestions"></datalist>
+    </div>
+
+    <div class="field">
+      <label>Supplier मोबाइल</label>
+      <input id="supplierPhone" inputmode="tel" placeholder="मोबाइल नंबर">
+    </div>
+
+    <div class="field">
+      <label>Supplier बिल नंबर</label>
+      <input id="invoiceNo" placeholder="जैसे INV-001">
+    </div>
+
+    <div class="field">
+      <label>खरीद की तारीख *</label>
+      <input id="purchaseDate" type="date">
+    </div>
+
+    <div class="field">
+      <label>भुगतान का तरीका</label>
+      <select id="paymentMode">
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Bank">Bank</option>
+        <option value="Credit">उधार</option>
+        <option value="Other">अन्य</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>भुगतान किया (₹)</label>
+      <input id="paidAmount" type="number" min="0" step="0.01" value="0">
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>🔎 PRODUCT DETAILS</h2>
+
+  <div class="grid">
+    <div class="field full">
+      <label>सामान का नाम *</label>
+      <input id="productName" list="productSuggestions" placeholder="नाम लिखें या सूची से चुनें" autocomplete="off">
+      <datalist id="productSuggestions"></datalist>
+    </div>
+
+    <div class="field">
+      <label>बारकोड</label>
+      <input id="barcode" placeholder="Barcode">
+    </div>
+
+    <div class="field">
+      <label>कैटेगरी</label>
+      <input id="category" placeholder="Category">
+    </div>
+
+    <div class="field">
+      <label>यूनिट</label>
+      <input id="unit" placeholder="Piece, Kg, Box">
+    </div>
+
+    <div class="field">
+      <label>खरीद रेट (₹) *</label>
+      <input id="buyRate" type="number" min="0" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="field">
+      <label>मात्रा *</label>
+      <input id="quantity" type="number" min="0.001" step="0.001" placeholder="0">
+    </div>
+
+    <div class="field">
+      <label>लाइन की कुल रकम (₹)</label>
+      <input id="lineTotal" readonly value="0.00">
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-cyan" type="button" onclick="addPurchaseItem()">＋ सामान जोड़ें</button>
+    <button class="btn-red" type="button" onclick="clearProductForm()">साफ करें</button>
+  </div>
+
+  <div id="productMessage" class="status"></div>
+  <p class="notice">पहले से मौजूद सामान का नाम चुनने पर उसकी जानकारी अपने आप आएगी। नया सामान भी यहाँ से जोड़ा जा सकता है।</p>
+</section>
+
+<section class="panel">
+  <h2>🧾 PURCHASE ITEMS</h2>
+
+  <div class="product-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>सामान</th>
+          <th>खरीद रेट</th>
+          <th>मात्रा</th>
+          <th>कुल</th>
+          <th>हटाएँ</th>
+        </tr>
+      </thead>
+
+      <tbody id="purchaseItemsBody">
+        <tr>
+          <td colspan="5" class="empty">अभी कोई सामान नहीं जोड़ा गया</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section><section class="panel">
+  <h2>💰 PURCHASE SUMMARY</h2>
+
+  <div class="summary">
+    <div class="stat">
+      <small>कुल सामान</small>
+      <strong id="itemCount">0</strong>
+    </div>
+
+    <div class="stat">
+      <small>कुल मात्रा</small>
+      <strong id="totalQuantity">0</strong>
+    </div>
+
+    <div class="stat">
+      <small>कुल खरीद रकम</small>
+      <strong id="grandTotal">₹0.00</strong>
+    </div>
+  </div>
+
+  <div style="margin-top:13px">
+    <div class="total-line">
+      <span>कुल खरीद</span>
+      <strong id="summaryTotal">₹0.00</strong>
+    </div>
+
+    <div class="total-line">
+      <span>भुगतान किया</span>
+      <strong id="summaryPaid">₹0.00</strong>
+    </div>
+
+    <div class="total-line">
+      <span>बाकी देना है</span>
+      <strong id="summaryDue">₹0.00</strong>
+    </div>
+  </div>
+
+  <div class="field" style="margin-top:12px">
+    <label>नोट / टिप्पणी</label>
+    <textarea id="purchaseNote" rows="2" placeholder="कोई जरूरी जानकारी..."></textarea>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-green" type="button" onclick="savePurchase()">✓ PURCHASE सेव करें</button>
+    <button class="btn-red" type="button" onclick="resetPurchase()">नई खरीद शुरू करें</button>
+  </div>
+
+  <div id="saveMessage" class="status"></div>
+</section>
+
+<section class="panel">
+  <h2>📚 RECENT PURCHASES</h2>
+  <div id="purchaseHistory">
+    <div class="empty">अभी कोई खरीद सेव नहीं हुई</div>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+"use strict";
+
+const INVENTORY_KEY = "nexus_inventory_test_v1";
+const PURCHASE_KEY = "nexus_purchase_test_v1";
+
+let inventory = [];
+let purchaseItems = [];
+let purchases = [];
+
+const $ = id => document.getElementById(id);
+
+function readStorage(key,fallback){
+  try{
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  }catch(error){
+    console.error("Storage read error:",error);
+    return fallback;
+  }
+}
+
+function saveStorage(key,value){
+  try{
+    localStorage.setItem(key,JSON.stringify(value));
+    return true;
+  }catch(error){
+    console.error("Storage save error:",error);
+    return false;
+  }
+}
+
+function money(value){
+  return "₹" + (Number(value) || 0).toFixed(2);
+}
+
+function getProductName(product){
+  return String(
+    product.productName ||
+    product.name ||
+    product.itemName ||
+    product.title ||
+    ""
+  ).trim();
+}
+
+function getProductBarcode(product){
+  return String(product.barcode || product.code || "");
+}
+
+function getProductPrice(product){
+  return Number(
+    product.purchasePrice ??
+    product.buyRate ??
+    product.purchase_rate ??
+    product.costPrice ??
+    0
+  );
+}
+
+function getProductStock(product){
+  return Number(
+    product.stock ??
+    product.quantity ??
+    product.qty ??
+    0
+  );
+}
+
+function loadData(){
+  inventory = readStorage(INVENTORY_KEY,[]);
+  purchases = readStorage(PURCHASE_KEY,[]);
+
+  if(!Array.isArray(inventory)) inventory = [];
+  if(!Array.isArray(purchases)) purchases = [];
+
+  updateProductSuggestions();
+  renderHistory();
+}
+
+function updateProductSuggestions(){
+  const list = $("productSuggestions");
+  list.innerHTML = "";
+
+  inventory.forEach(product => {
+    const name = getProductName(product);
+    if(!name) return;
+
+    const option = document.createElement("option");
+    option.value = name;
+    list.appendChild(option);
+  });
+}
+
+function findProduct(name){
+  const search = String(name || "").trim().toLowerCase();
+  if(!search) return null;
+
+  return inventory.find(product =>
+    getProductName(product).toLowerCase() === search
+  ) || null;
+}
+
+function autoFillProduct(){
+  const name = $("productName").value.trim();
+  const product = findProduct(name);
+
+  if(!product) return;
+
+  $("barcode").value = getProductBarcode(product);
+  $("category").value = product.category || "";
+  $("unit").value = product.unit || product.measurementUnit || "";
+  $("buyRate").value = getProductPrice(product) || "";
+
+  $("productMessage").textContent =
+    "✓ Inventory से सामान की जानकारी मिल गई";
+
+  $("productMessage").className = "status ok";
+  calculateLine();
+}
+
+$("productName").addEventListener("input",autoFillProduct);
+$("productName").addEventListener("change",autoFillProduct);
+$("buyRate").addEventListener("input",calculateLine);
+$("quantity").addEventListener("input",calculateLine);
+$("paidAmount").addEventListener("input",updateSummary);
+
+function calculateLine(){
+  const rate = Number($("buyRate").value) || 0;
+  const qty = Number($("quantity").value) || 0;
+
+  $("lineTotal").value = (rate * qty).toFixed(2);
+}
+
+function clearProductForm(){
+  [
+    "productName",
+    "barcode",
+    "category",
+    "unit",
+    "buyRate",
+    "quantity"
+  ].forEach(id => {
+    $(id).value = "";
+  });
+
+  $("lineTotal").value = "0.00";
+  $("productMessage").textContent = "";
+}
+
+function addPurchaseItem(){
+  const name = $("productName").value.trim();
+  const rate = Number($("buyRate").value);
+  const qty = Number($("quantity").value);
+
+  if(!name){
+    showStatus("productMessage","पहले सामान का नाम लिखें","error");
+    return;
+  }
+
+  if(!Number.isFinite(rate) || rate < 0){
+    showStatus("productMessage","सही खरीद रेट डालें","error");
+    return;
+  }
+
+  if(!Number.isFinite(qty) || qty <= 0){
+    showStatus("productMessage","मात्रा शून्य से अधिक होनी चाहिए","error");
+    return;
+  }
+
+  const existing = findProduct(name);
+
+  purchaseItems.push({
+    name:name,
+    barcode:$("barcode").value.trim(),
+    category:$("category").value.trim(),
+    unit:$("unit").value.trim(),
+    rate:rate,
+    quantity:qty,
+    total:rate * qty,
+    inventoryId:existing ? (existing.id || null) : null
+  });
+
+  renderItems();
+  clearProductForm();
+
+  showStatus(
+    "productMessage",
+    "सामान खरीद सूची में जोड़ दिया गया",
+    "ok"
+  );
+}
+
+function renderItems(){
+  const body = $("purchaseItemsBody");
+  body.innerHTML = "";
+
+  if(purchaseItems.length === 0){
+    body.innerHTML =
+      '<tr><td colspan="5" class="empty">अभी कोई सामान नहीं जोड़ा गया</td></tr>';
+
+    updateSummary();
+    return;
+  }
+
+  purchaseItems.forEach((item,index) => {
+    const tr = document.createElement("tr");
+
+    const nameCell = document.createElement("td");
+    nameCell.textContent =
+      item.name + (item.unit ? " (" + item.unit + ")" : "");
+
+    const rateCell = document.createElement("td");
+    rateCell.textContent = money(item.rate);
+
+    const qtyCell = document.createElement("td");
+    qtyCell.textContent = item.quantity;
+
+    const totalCell = document.createElement("td");
+    totalCell.textContent = money(item.total);
+
+    const actionCell = document.createElement("td");
+    const button = document.createElement("button");
+
+    button.className = "btn-red";
+    button.textContent = "हटाएँ";
+    button.type = "button";
+    button.onclick = () => removeItem(index);
+
+    actionCell.appendChild(button);
+
+    [
+      nameCell,
+      rateCell,
+      qtyCell,
+      totalCell,
+      actionCell
+    ].forEach(cell => tr.appendChild(cell));
+
+    body.appendChild(tr);
+  });
+
+  updateSummary();
+}
+
+function removeItem(index){
+  purchaseItems.splice(index,1);
+  renderItems();
+}
+
+function calculateTotals(){
+  const total = purchaseItems.reduce(
+    (sum,item) => sum + item.total,0
+  );
+
+  const quantity = purchaseItems.reduce(
+    (sum,item) => sum + item.quantity,0
+  );
+
+  const paid = Number($("paidAmount").value) || 0;
+
+  return {
+    total,
+    quantity,
+    paid,
+    due:total-paid
+  };
+}
+
+function updateSummary(){
+  const totals = calculateTotals();
+
+  $("itemCount").textContent = purchaseItems.length;
+  $("totalQuantity").textContent = totals.quantity;
+  $("grandTotal").textContent = money(totals.total);
+  $("summaryTotal").textContent = money(totals.total);
+  $("summaryPaid").textContent = money(totals.paid);
+  $("summaryDue").textContent = money(totals.due);
+}
+
+function showStatus(id,message,type){
+  const element = $(id);
+  element.textContent = message;
+  element.className = "status " + type;
+}
+
+function updateInventoryAfterPurchase(){
+  purchaseItems.forEach(item => {
+    let product = findProduct(item.name);
+
+    if(!product){
+      product = {
+        id:"PRD-" + Date.now() + "-" +
+          Math.random().toString(36).slice(2,7),
+        productName:item.name,
+        barcode:item.barcode,
+        category:item.category,
+        unit:item.unit,
+        purchasePrice:item.rate,
+        mrp:0,
+        salePrice:0,
+        stock:0,
+        brand:"",
+        description:""
+      };
+
+      inventory.push(product);
+    }
+
+    product.stock = getProductStock(product) + item.quantity;
+    product.purchasePrice = item.rate;
+
+    if(item.barcode && !getProductBarcode(product)){
+      product.barcode = item.barcode;
+    }
+
+    if(item.category && !product.category){
+      product.category = item.category;
+    }
+
+    if(item.unit && !product.unit){
+      product.unit = item.unit;
+    }
+  });
+
+  return saveStorage(INVENTORY_KEY,inventory);
+}
+
+function savePurchase(){
+  const supplier = $("supplierName").value.trim();
+  const date = $("purchaseDate").value;
+  const totals = calculateTotals();
+
+  if(!supplier){
+    showStatus("saveMessage","Supplier का नाम जरूरी है","error");
+    return;
+  }
+
+  if(!date){
+    showStatus("saveMessage","खरीद की तारीख चुनें","error");
+    return;
+  }
+
+  if(purchaseItems.length === 0){
+    showStatus("saveMessage","कम से कम एक सामान जोड़ें","error");
+    return;
+  }
+
+  if(totals.paid < 0 || totals.paid > totals.total){
+    showStatus(
+      "saveMessage",
+      "भुगतान की रकम कुल खरीद से ज्यादा या शून्य से कम नहीं हो सकती",
+      "error"
+    );
+    return;
+  }
+
+  const purchase = {
+    id:"PUR-" + Date.now(),
+    supplier:supplier,
+    supplierPhone:$("supplierPhone").value.trim(),
+    invoiceNo:$("invoiceNo").value.trim(),
+    date:date,
+    paymentMode:$("paymentMode").value,
+    items:purchaseItems.map(item => ({...item})),
+    total:totals.total,
+    paid:totals.paid,
+    due:totals.due,
+    note:$("purchaseNote").value.trim(),
+    createdAt:new Date().toISOString()
+  };
+
+  const oldInventory = JSON.stringify(inventory);
+  const oldPurchases = purchases.slice();
+
+  purchases.unshift(purchase);
+
+  if(!updateInventoryAfterPurchase()){
+    inventory = JSON.parse(oldInventory);
+    purchases = oldPurchases;
+
+    saveStorage(INVENTORY_KEY,inventory);
+
+    showStatus(
+      "saveMessage",
+      "Purchase सेव नहीं हुई। Inventory Storage अपडेट नहीं हो पाई।",
+      "error"
+    );
+    return;
+  }
+
+  if(!saveStorage(PURCHASE_KEY,purchases)){
+    inventory = JSON.parse(oldInventory);
+    purchases = oldPurchases;
+
+    saveStorage(INVENTORY_KEY,inventory);
+
+    showStatus(
+      "saveMessage",
+      "Purchase सेव नहीं हुई। Storage में जगह जाँचें।",
+      "error"
+    );
+    return;
+  }
+
+  showStatus(
+    "saveMessage",
+    "✓ Purchase सेव हो गई और Inventory का स्टॉक अपडेट हो गया",
+    "ok"
+  );
+
+  renderHistory();
+  updateProductSuggestions();
+
+  purchaseItems = [];
+  renderItems();
+
+  $("supplierName").value = "";
+  $("supplierPhone").value = "";
+  $("invoiceNo").value = "";
+  $("paidAmount").value = "0";
+  $("purchaseNote").value = "";
+  $("paymentMode").value = "Cash";
+
+  updateSummary();
+}
+
+function renderHistory(){
+  const box = $("purchaseHistory");
+  box.innerHTML = "";
+
+  if(purchases.length === 0){
+    box.innerHTML =
+      '<div class="empty">अभी कोई खरीद सेव नहीं हुई</div>';
+    return;
+  }
+
+  purchases.slice(0,20).forEach(purchase => {
+    const row = document.createElement("div");
+    row.className = "history-row";
+    row.style.padding = "11px 2px";
+    row.style.borderBottom = "1px solid #173449";
+
+    const left = document.createElement("div");
+
+    const title = document.createElement("strong");
+    title.textContent = purchase.supplier || "Supplier";
+
+    const detail = document.createElement("small");
+    detail.textContent =
+      (purchase.date || "") + " · " +
+      (purchase.items || []).length + " सामान";
+
+    left.append(title,detail);
+
+    const right = document.createElement("div");
+    right.style.textAlign = "right";
+
+    const amount = document.createElement("strong");
+    amount.textContent = money(purchase.total);
+
+    const due = document.createElement("small");
+    due.textContent = "बाकी: " + money(purchase.due);
+
+    right.append(amount,due);
+    row.append(left,right);
+    box.appendChild(row);
+  });
+}
+
+function resetPurchase(){
+  if(
+    purchaseItems.length &&
+    !confirm("मौजूदा खरीद की सूची साफ करनी है?")
+  ){
+    return;
+  }
+
+  purchaseItems = [];
+  renderItems();
+  clearProductForm();
+
+  $("supplierName").value = "";
+  $("supplierPhone").value = "";
+  $("invoiceNo").value = "";
+  $("paidAmount").value = "0";
+  $("purchaseNote").value = "";
+  $("paymentMode").value = "Cash";
+  $("purchaseDate").value =
+    new Date().toISOString().slice(0,10);
+
+  showStatus(
+    "saveMessage",
+    "नई खरीद के लिए फॉर्म तैयार है",
+    "ok"
+  );
+}
+
+$("purchaseDate").value =
+  new Date().toISOString().slice(0,10);
+
+loadData();
+renderItems();
+updateSummary();
+
+</script>
+</body>
+</html>

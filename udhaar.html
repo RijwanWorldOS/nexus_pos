@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS POS - Udhaar</title>
+
+<style>
+:root{
+  --bg-primary:#030712;
+  --bg-card:#081423;
+  --accent-cyan:#00f3ff;
+  --accent-green:#00ff66;
+  --accent-gold:#f1c40f;
+  --accent-red:#ff3366;
+  --text:#e5f4ff;
+  --muted:#8ca5ba;
+  --border:#16445a;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg-primary);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+body{
+  overflow:hidden;
+  display:flex;
+  justify-content:center;
+}
+.app{
+  width:100%;
+  max-width:480px;
+  height:100vh;
+  height:100dvh;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--bg-primary);
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+}
+.header{
+  flex-shrink:0;
+  padding:12px;
+  background:#050d19;
+  border-bottom:1px solid var(--accent-cyan);
+  box-shadow:0 2px 15px #00f3ff22;
+}
+.header h1{
+  margin:0;
+  color:var(--accent-cyan);
+  font-size:19px;
+  letter-spacing:1px;
+}
+.header small{color:var(--muted);font-size:11px}
+.nav{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding-bottom:3px;
+}
+.nav a{
+  flex-shrink:0;
+  color:var(--accent-cyan);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:7px 9px;
+  font-size:12px;
+}
+.nav a.active{background:#06313a;border-color:var(--accent-cyan)}
+.main-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  padding:12px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent-cyan) #07111d;
+}
+.container{width:100%;max-width:100%;margin:0 auto}
+.panel{
+  width:100%;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 0 12px #00f3ff0b;
+}
+.panel h2{
+  color:var(--accent-cyan);
+  font-size:14px;
+  margin:0 0 12px;
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.field{min-width:0}
+.field.full{grid-column:1/-1}
+label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:5px;
+}
+input,select,textarea{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:10px 8px;
+  border:1px solid #1b465c;
+  border-radius:6px;
+  outline:none;
+  background:#030d19;
+  color:var(--text);
+  font-size:13px;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent-cyan);
+  box-shadow:0 0 7px #00f3ff33;
+}
+button{
+  border:0;
+  border-radius:6px;
+  padding:10px 12px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:12px;
+}
+.btn-green{background:var(--accent-green);color:#001b0b}
+.btn-cyan{background:var(--accent-cyan);color:#001318}
+.btn-red{background:#401321;color:#ff8ba5;border:1px solid var(--accent-red)}
+.btn-gold{background:var(--accent-gold);color:#211900}
+.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.summary{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.stat{
+  min-width:0;
+  background:#061321;
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:11px 7px;
+  text-align:center;
+}
+.stat small{display:block;color:var(--muted);font-size:10px}
+.stat strong{
+  display:block;
+  margin-top:6px;
+  color:var(--accent-green);
+  font-size:15px;
+  overflow-wrap:anywhere;
+}
+.stat.danger strong{color:#ff718e}
+.status{font-size:12px;margin-top:10px;min-height:17px}
+.status.ok{color:var(--accent-green)}
+.status.error{color:#ff718e}
+.notice{font-size:11px;color:var(--muted);line-height:1.5;margin-top:8px}
+.list-scroll{
+  max-height:260px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  border:1px solid var(--border);
+  border-radius:7px;
+}
+.record{
+  padding:10px;
+  border-bottom:1px solid #173449;
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+  align-items:center;
+}
+.record:last-child{border-bottom:0}
+.record strong{display:block;color:var(--text);font-size:13px}
+.record small{display:block;color:var(--muted);font-size:11px;margin-top:4px}
+.record .amount{text-align:right;color:var(--accent-green);font-weight:bold;font-size:13px}
+.record .amount.due{color:#ff718e}
+.empty{text-align:center;color:var(--muted);padding:18px;font-size:12px}
+.total-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid #173449;
+  font-size:13px;
+}
+.total-line strong{color:var(--accent-green)}
+@media(max-width:380px){
+  .main-scroll{padding:9px}
+  .panel{padding:10px}
+  .grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .header h1{font-size:17px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header class="header">
+  <h1>⚡ NEXUS POS · UDHAAR</h1>
+  <small>Customer Credit & Supplier Balance</small>
+  <nav class="nav">
+    <a href="index.html">Dashboard</a>
+    <a href="calculator_lock.html">Billing</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="purchase.html">Purchase</a>
+    <a class="active" href="udhaar.html">Udhaar</a>
+  </nav>
+</header>
+
+<main class="main-scroll">
+<div class="container">
+
+<section class="panel">
+  <h2>📊 हिसाब का सारांश</h2>
+  <div class="summary">
+    <div class="stat">
+      <small>ग्राहकों से लेना है</small>
+      <strong id="customerDueTotal">₹0.00</strong>
+    </div>
+    <div class="stat danger">
+      <small>सप्लायर को देना है</small>
+      <strong id="supplierDueTotal">₹0.00</strong>
+    </div>
+    <div class="stat">
+      <small>ग्राहक रिकॉर्ड</small>
+      <strong id="customerCount">0</strong>
+    </div>
+    <div class="stat">
+      <small>सप्लायर रिकॉर्ड</small>
+      <strong id="supplierCount">0</strong>
+    </div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>👤 ग्राहक का उधार / वसूली</h2>
+
+  <div class="grid">
+    <div class="field full">
+      <label>ग्राहक का नाम *</label>
+      <input id="customerName" list="customerSuggestions" placeholder="ग्राहक का नाम लिखें">
+      <datalist id="customerSuggestions"></datalist>
+    </div>
+
+    <div class="field">
+      <label>मोबाइल नंबर</label>
+      <input id="customerPhone" inputmode="tel" placeholder="मोबाइल नंबर">
+    </div>
+
+    <div class="field">
+      <label>एंट्री का प्रकार *</label>
+      <select id="customerEntryType">
+        <option value="credit">नया उधार जोड़ें</option>
+        <option value="collection">पैसा प्राप्त हुआ</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>रकम (₹) *</label>
+      <input id="customerAmount" type="number" min="0.01" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="field">
+      <label>तारीख *</label>
+      <input id="customerDate" type="date">
+    </div>
+
+    <div class="field full">
+      <label>विवरण / नोट</label>
+      <input id="customerNote" placeholder="जैसे बिल नंबर या भुगतान की जानकारी">
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-green" type="button" onclick="saveCustomerEntry()">एंट्री सेव करें</button>
+    <button class="btn-red" type="button" onclick="clearCustomerForm()">साफ करें</button>
+  </div>
+  <div id="customerMessage" class="status"></div>
+</section>
+
+<section class="panel">
+  <h2>🔎 ग्राहक का हिसाब देखें</h2>
+  <div class="field">
+    <label>ग्राहक चुनें / नाम खोजें</label>
+    <input id="customerSearch" list="customerSuggestions" placeholder="ग्राहक का नाम">
+  </div>
+  <div id="customerBalance" style="margin-top:12px">
+    <div class="empty">ग्राहक चुनने पर उसका हिसाब दिखेगा</div>
+  </div>
+  <div class="list-scroll" id="customerHistory" style="margin-top:10px">
+    <div class="empty">अभी कोई रिकॉर्ड नहीं</div>
+  </div>
+</section><section class="panel">
+  <h2>🏪 सप्लायर का भुगतान</h2>
+
+  <div class="grid">
+    <div class="field full">
+      <label>सप्लायर का नाम *</label>
+      <input id="supplierName" list="supplierSuggestions" placeholder="Purchase में दर्ज सप्लायर चुनें">
+      <datalist id="supplierSuggestions"></datalist>
+    </div>
+
+    <div class="field">
+      <label>भुगतान की रकम (₹) *</label>
+      <input id="supplierAmount" type="number" min="0.01" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="field">
+      <label>भुगतान का तरीका</label>
+      <select id="supplierPaymentMode">
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Bank">Bank</option>
+        <option value="Other">अन्य</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>भुगतान की तारीख *</label>
+      <input id="supplierDate" type="date">
+    </div>
+
+    <div class="field">
+      <label>रेफरेंस / नोट</label>
+      <input id="supplierNote" placeholder="भुगतान की जानकारी">
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-cyan" type="button" onclick="saveSupplierPayment()">सप्लायर भुगतान सेव करें</button>
+    <button class="btn-red" type="button" onclick="clearSupplierForm()">साफ करें</button>
+  </div>
+
+  <div id="supplierMessage" class="status"></div>
+  <p class="notice">सप्लायर का बाकी हिसाब Purchase रिकॉर्ड से निकलेगा। यहाँ भुगतान दर्ज करने पर उसका बाकी घटेगा।</p>
+</section>
+
+<section class="panel">
+  <h2>📋 सप्लायर का बाकी हिसाब</h2>
+  <div class="list-scroll" id="supplierBalanceList">
+    <div class="empty">अभी कोई सप्लायर बाकी नहीं है</div>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>🧾 हाल की एंट्री</h2>
+  <div class="list-scroll" id="recentEntries">
+    <div class="empty">अभी कोई एंट्री नहीं है</div>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+"use strict";
+
+const UDHAAR_KEY = "nexus_udhaar_test_v1";
+const PURCHASE_KEY = "nexus_purchase_test_v1";
+
+let entries = [];
+let purchases = [];
+let customerBalances = [];
+let supplierBalances = [];
+
+const $ = id => document.getElementById(id);
+
+function todayLocal(){
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return year + "-" + month + "-" + day;
+}
+
+function money(value){
+  return "₹" + (Number(value) || 0).toFixed(2);
+}
+
+function cleanName(value){
+  return String(value || "").trim().replace(/\s+/g," ");
+}
+
+function nameKey(value){
+  return cleanName(value).toLocaleLowerCase("hi");
+}
+
+function readStorage(key,fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+
+    const parsed = JSON.parse(raw);
+    return parsed;
+  }catch(error){
+    console.error("Storage read error:",error);
+    return fallback;
+  }
+}
+
+function saveStorage(key,value){
+  try{
+    localStorage.setItem(key,JSON.stringify(value));
+    return true;
+  }catch(error){
+    console.error("Storage save error:",error);
+    return false;
+  }
+}
+
+function showStatus(id,message,type){
+  const element = $(id);
+  element.textContent = message;
+  element.className = "status " + type;
+}
+
+function getPurchaseSupplier(purchase){
+  return cleanName(purchase.supplier || purchase.supplierName || "");
+}
+
+function getPurchaseDue(purchase){
+  const due = Number(purchase.due);
+  return Number.isFinite(due) && due > 0 ? due : 0;
+}
+
+function loadData(){
+  const savedEntries = readStorage(UDHAAR_KEY,[]);
+  const savedPurchases = readStorage(PURCHASE_KEY,[]);
+
+  entries = Array.isArray(savedEntries) ? savedEntries : [];
+  purchases = Array.isArray(savedPurchases) ? savedPurchases : [];
+
+  entries = entries.filter(entry =>
+    entry &&
+    typeof entry === "object" &&
+    ["customer_credit","customer_collection","supplier_payment"].includes(entry.type) &&
+    cleanName(entry.name) &&
+    Number.isFinite(Number(entry.amount)) &&
+    Number(entry.amount) > 0
+  );
+
+  purchases = purchases.filter(purchase =>
+    purchase && typeof purchase === "object"
+  );
+
+  calculateBalances();
+  updateSuggestions();
+  renderAll();
+}
+
+function calculateBalances(){
+  const customerMap = new Map();
+  const supplierMap = new Map();
+
+  entries.forEach(entry => {
+    const key = nameKey(entry.name);
+    if(!key) return;
+
+    const amount = Number(entry.amount) || 0;
+
+    if(entry.type === "customer_credit" ||
+       entry.type === "customer_collection"){
+
+      if(!customerMap.has(key)){
+        customerMap.set(key,{
+          name:cleanName(entry.name),
+          phone:entry.phone || "",
+          credit:0,
+          collection:0,
+          balance:0
+        });
+      }
+
+      const customer = customerMap.get(key);
+
+      if(entry.type === "customer_credit"){
+        customer.credit += amount;
+      }else{
+        customer.collection += amount;
+      }
+
+      if(entry.phone) customer.phone = entry.phone;
+    }
+
+    if(entry.type === "supplier_payment"){
+      if(!supplierMap.has(key)){
+        supplierMap.set(key,{
+          name:cleanName(entry.name),
+          paid:0,
+          due:0,
+          balance:0
+        });
+      }
+
+      supplierMap.get(key).paid += amount;
+    }
+  });
+
+  purchases.forEach(purchase => {
+    const name = getPurchaseSupplier(purchase);
+    const key = nameKey(name);
+    if(!key) return;
+
+    if(!supplierMap.has(key)){
+      supplierMap.set(key,{
+        name:name,
+        paid:0,
+        due:0,
+        balance:0
+      });
+    }
+
+    supplierMap.get(key).due += getPurchaseDue(purchase);
+  });
+
+  customerBalances = Array.from(customerMap.values()).map(customer => {
+    customer.balance = customer.credit - customer.collection;
+    return customer;
+  });
+
+  supplierBalances = Array.from(supplierMap.values()).map(supplier => {
+    supplier.balance = supplier.due - supplier.paid;
+    return supplier;
+  });
+}
+
+function updateSuggestions(){
+  const customerList = $("customerSuggestions");
+  const supplierList = $("supplierSuggestions");
+
+  customerList.innerHTML = "";
+  supplierList.innerHTML = "";
+
+  customerBalances.forEach(customer => {
+    const option = document.createElement("option");
+    option.value = customer.name;
+    customerList.appendChild(option);
+  });
+
+  supplierBalances.forEach(supplier => {
+    const option = document.createElement("option");
+    option.value = supplier.name;
+    supplierList.appendChild(option);
+  });
+}
+
+function renderAll(){
+  renderSummary();
+  renderSupplierBalances();
+  renderRecentEntries();
+
+  if($("customerSearch").value.trim()){
+    renderCustomerDetails($("customerSearch").value);
+  }
+}
+
+function renderSummary(){
+  const customerDue = customerBalances.reduce(
+    (sum,item) => sum + Math.max(0,item.balance),0
+  );
+
+  const supplierDue = supplierBalances.reduce(
+    (sum,item) => sum + Math.max(0,item.balance),0
+  );
+
+  $("customerDueTotal").textContent = money(customerDue);
+  $("supplierDueTotal").textContent = money(supplierDue);
+  $("customerCount").textContent = customerBalances.length;
+  $("supplierCount").textContent = supplierBalances.length;
+}
+
+function saveCustomerEntry(){
+  const name = cleanName($("customerName").value);
+  const phone = $("customerPhone").value.trim();
+  const type = $("customerEntryType").value;
+  const amount = Number($("customerAmount").value);
+  const date = $("customerDate").value;
+  const note = $("customerNote").value.trim();
+
+  if(!name){
+    showStatus("customerMessage","ग्राहक का नाम जरूरी है","error");
+    return;
+  }
+
+  if(!Number.isFinite(amount) || amount <= 0){
+    showStatus("customerMessage","रकम शून्य से अधिक डालें","error");
+    return;
+  }
+
+  if(!date){
+    showStatus("customerMessage","तारीख चुनें","error");
+    return;
+  }
+
+  const key = nameKey(name);
+  const customer = customerBalances.find(
+    item => nameKey(item.name) === key
+  );
+
+  const currentBalance = customer ? customer.balance : 0;
+
+  if(type === "collection" && amount > Math.max(0,currentBalance)){
+    showStatus(
+      "customerMessage",
+      "प्राप्त रकम ग्राहक के बाकी उधार से अधिक नहीं हो सकती",
+      "error"
+    );
+    return;
+  }
+
+  const entry = {
+    id:"UDH-" + Date.now() + "-" + Math.random().toString(36).slice(2,6),
+    type:type === "credit" ? "customer_credit" : "customer_collection",
+    name:name,
+    phone:phone,
+    amount:amount,
+    date:date,
+    note:note,
+    createdAt:new Date().toISOString()
+  };
+
+  const nextEntries = entries.concat(entry);
+
+  if(!saveStorage(UDHAAR_KEY,nextEntries)){
+    showStatus(
+      "customerMessage",
+      "एंट्री सेव नहीं हुई। ब्राउज़र Storage की जगह जाँचें।",
+      "error"
+    );
+    return;
+  }
+
+  entries = nextEntries;
+  calculateBalances();
+  updateSuggestions();
+  renderAll();
+
+  $("customerSearch").value = name;
+  $("customerName").value = "";
+  $("customerPhone").value = "";
+  $("customerAmount").value = "";
+  $("customerNote").value = "";
+
+  renderCustomerDetails(name);
+
+  showStatus("customerMessage","✓ ग्राहक की एंट्री सेव हो गई","ok");
+}
+
+function clearCustomerForm(){
+  $("customerName").value = "";
+  $("customerPhone").value = "";
+  $("customerAmount").value = "";
+  $("customerNote").value = "";
+  $("customerEntryType").value = "credit";
+  $("customerDate").value = todayLocal();
+  $("customerMessage").textContent = "";
+}
+
+function renderCustomerDetails(searchName){
+  const key = nameKey(searchName);
+  const balanceBox = $("customerBalance");
+  const historyBox = $("customerHistory");
+
+  if(!key){
+    balanceBox.innerHTML =
+      '<div class="empty">ग्राहक चुनने पर उसका हिसाब दिखेगा</div>';
+    historyBox.innerHTML =
+      '<div class="empty">अभी कोई रिकॉर्ड नहीं</div>';
+    return;
+  }
+
+  const customer = customerBalances.find(
+    item => nameKey(item.name) === key
+  );
+
+  if(!customer){
+    balanceBox.innerHTML =
+      '<div class="empty">इस नाम का ग्राहक रिकॉर्ड नहीं मिला</div>';
+    historyBox.innerHTML =
+      '<div class="empty">पहले ग्राहक की उधार एंट्री सेव करें</div>';
+    return;
+  }
+
+  balanceBox.innerHTML = "";
+
+  const rows = [
+    ["कुल उधार",money(customer.credit)],
+    ["कुल प्राप्त",money(customer.collection)],
+    ["बाकी रकम",money(customer.balance)]
+  ];
+
+  rows.forEach(([label,value]) => {
+    const row = document.createElement("div");
+    row.className = "total-line";
+
+    const left = document.createElement("span");
+    left.textContent = label;
+
+    const right = document.createElement("strong");
+    right.textContent = value;
+
+    row.append(left,right);
+    balanceBox.appendChild(row);
+  });
+
+  const customerEntries = entries
+    .filter(entry =>
+      (entry.type === "customer_credit" ||
+       entry.type === "customer_collection") &&
+      nameKey(entry.name) === key
+    )
+    .sort((a,b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+
+  historyBox.innerHTML = "";
+
+  if(customerEntries.length === 0){
+    historyBox.innerHTML = '<div class="empty">कोई एंट्री नहीं</div>';
+    return;
+  }
+
+  customerEntries.forEach(entry => {
+    const row = document.createElement("div");
+    row.className = "record";
+
+    const left = document.createElement("div");
+    const title = document.createElement("strong");
+    const detail = document.createElement("small");
+
+    title.textContent =
+      entry.type === "customer_credit" ? "उधार जोड़ा" : "पैसा प्राप्त";
+
+    detail.textContent =
+      (entry.date || "") + (entry.note ? " · " + entry.note : "");
+
+    left.append(title,detail);
+
+    const amount = document.createElement("div");
+    amount.className = "amount";
+    amount.textContent =
+      (entry.type === "customer_credit" ? "+" : "-") +
+      money(entry.amount);
+
+    row.append(left,amount);
+    historyBox.appendChild(row);
+  });
+}
+
+$("customerSearch").addEventListener("input",event => {
+  renderCustomerDetails(event.target.value);
+});
+
+function saveSupplierPayment(){
+  const name = cleanName($("supplierName").value);
+  const amount = Number($("supplierAmount").value);
+  const date = $("supplierDate").value;
+  const mode = $("supplierPaymentMode").value;
+  const note = $("supplierNote").value.trim();
+
+  if(!name){
+    showStatus("supplierMessage","सप्लायर का नाम जरूरी है","error");
+    return;
+  }
+
+  if(!Number.isFinite(amount) || amount <= 0){
+    showStatus("supplierMessage","सही भुगतान रकम डालें","error");
+    return;
+  }
+
+  if(!date){
+    showStatus("supplierMessage","भुगतान की तारीख चुनें","error");
+    return;
+  }
+
+  const supplier = supplierBalances.find(
+    item => nameKey(item.name) === nameKey(name)
+  );
+
+  if(!supplier){
+    showStatus(
+      "supplierMessage",
+      "यह सप्लायर Purchase रिकॉर्ड में नहीं मिला",
+      "error"
+    );
+    return;
+  }
+
+  const outstanding = supplier.balance;
+
+  if(outstanding <= 0){
+    showStatus(
+      "supplierMessage",
+      "इस सप्लायर का कोई बाकी भुगतान नहीं है",
+      "error"
+    );
+    return;
+  }
+
+  if(amount > outstanding){
+    showStatus(
+      "supplierMessage",
+      "भुगतान बाकी रकम से अधिक नहीं हो सकता। बाकी: " + money(outstanding),
+      "error"
+    );
+    return;
+  }
+
+  const entry = {
+    id:"SUP-" + Date.now() + "-" + Math.random().toString(36).slice(2,6),
+    type:"supplier_payment",
+    name:supplier.name,
+    amount:amount,
+    date:date,
+    mode:mode,
+    note:note,
+    createdAt:new Date().toISOString()
+  };
+
+  const nextEntries = entries.concat(entry);
+
+  if(!saveStorage(UDHAAR_KEY,nextEntries)){
+    showStatus(
+      "supplierMessage",
+      "भुगतान सेव नहीं हुआ। Storage की जगह जाँचें।",
+      "error"
+    );
+    return;
+  }
+
+  entries = nextEntries;
+  calculateBalances();
+  updateSuggestions();
+  renderAll();
+
+  $("supplierName").value = "";
+  $("supplierAmount").value = "";
+  $("supplierNote").value = "";
+
+  showStatus(
+    "supplierMessage",
+    "✓ सप्लायर का भुगतान सेव हो गया",
+    "ok"
+  );
+}
+
+function clearSupplierForm(){
+  $("supplierName").value = "";
+  $("supplierAmount").value = "";
+  $("supplierNote").value = "";
+  $("supplierPaymentMode").value = "Cash";
+  $("supplierDate").value = todayLocal();
+  $("supplierMessage").textContent = "";
+}
+
+function renderSupplierBalances(){
+  const box = $("supplierBalanceList");
+  box.innerHTML = "";
+
+  const outstanding = supplierBalances.filter(
+    item => item.balance > 0
+  );
+
+  if(outstanding.length === 0){
+    box.innerHTML =
+      '<div class="empty">अभी किसी सप्लायर का बाकी भुगतान नहीं है</div>';
+    return;
+  }
+
+  outstanding.forEach(supplier => {
+    const row = document.createElement("div");
+    row.className = "record";
+
+    const left = document.createElement("div");
+    const title = document.createElement("strong");
+    const detail = document.createElement("small");
+
+    title.textContent = supplier.name;
+    detail.textContent =
+      "Purchase बाकी: " + money(supplier.due) +
+      " · भुगतान: " + money(supplier.paid);
+
+    left.append(title,detail);
+
+    const amount = document.createElement("div");
+    amount.className = "amount due";
+    amount.textContent = money(supplier.balance);
+
+    row.append(left,amount);
+    box.appendChild(row);
+  });
+}
+
+function renderRecentEntries(){
+  const box = $("recentEntries");
+  box.innerHTML = "";
+
+  const recent = entries.slice().sort(
+    (a,b) => String(b.createdAt).localeCompare(String(a.createdAt))
+  ).slice(0,30);
+
+  if(recent.length === 0){
+    box.innerHTML = '<div class="empty">अभी कोई एंट्री नहीं है</div>';
+    return;
+  }
+
+  recent.forEach(entry => {
+    const row = document.createElement("div");
+    row.className = "record";
+
+    const left = document.createElement("div");
+    const title = document.createElement("strong");
+    const detail = document.createElement("small");
+
+    let label = "ग्राहक उधार";
+    let sign = "+";
+
+    if(entry.type === "customer_collection"){
+      label = "ग्राहक से वसूली";
+      sign = "-";
+    }else if(entry.type === "supplier_payment"){
+      label = "सप्लायर को भुगतान";
+      sign = "-";
+    }
+
+    title.textContent = label + " · " + entry.name;
+    detail.textContent =
+      (entry.date || "") +
+      (entry.mode ? " · " + entry.mode : "") +
+      (entry.note ? " · " + entry.note : "");
+
+    left.append(title,detail);
+
+    const amount = document.createElement("div");
+    amount.className = "amount";
+    amount.textContent = sign + money(entry.amount);
+
+    row.append(left,amount);
+    box.appendChild(row);
+  });
+}
+
+$("customerDate").value = todayLocal();
+$("supplierDate").value = todayLocal();
+
+loadData();
+</script>
+</body>
+</html>

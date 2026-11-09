@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS POS - Future Ledger</title>
+
+<style>
+:root{
+  --bg-primary:#030712;
+  --bg-card:#081423;
+  --bg-panel:#0b1b2c;
+  --accent-cyan:#00f3ff;
+  --accent-green:#00ff66;
+  --accent-gold:#f1c40f;
+  --accent-red:#ff3366;
+  --text:#e5f4ff;
+  --muted:#8ca5ba;
+  --border:#16445a;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg-primary);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+body{
+  display:flex;
+  justify-content:center;
+  overflow:hidden;
+}
+.app{
+  width:100%;
+  max-width:480px;
+  height:100vh;
+  height:100dvh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  background:var(--bg-primary);
+  border-left:1px solid var(--border);
+  border-right:1px solid var(--border);
+}
+.header{
+  flex-shrink:0;
+  padding:12px;
+  background:#050d19;
+  border-bottom:1px solid var(--accent-cyan);
+  box-shadow:0 2px 15px #00f3ff22;
+}
+.brand{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.header h1{
+  margin:0;
+  color:var(--accent-cyan);
+  font-size:19px;
+  letter-spacing:1px;
+}
+.live-indicator{
+  flex-shrink:0;
+  color:var(--accent-green);
+  font-size:10px;
+  border:1px solid #00ff6655;
+  padding:5px 7px;
+  border-radius:20px;
+}
+.header small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+  margin-top:4px;
+}
+.nav{
+  display:flex;
+  gap:7px;
+  margin-top:10px;
+  overflow-x:auto;
+  white-space:nowrap;
+  padding-bottom:3px;
+}
+.nav a{
+  flex-shrink:0;
+  color:var(--accent-cyan);
+  text-decoration:none;
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:7px 9px;
+  font-size:12px;
+}
+.nav a.active{
+  background:#06313a;
+  border-color:var(--accent-cyan);
+}
+.main-scroll{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  padding:12px;
+  scrollbar-width:thin;
+  scrollbar-color:var(--accent-cyan) #07111d;
+}
+.container{width:100%;max-width:100%;margin:0 auto}
+.panel{
+  width:100%;
+  background:var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px;
+  margin-bottom:12px;
+  box-shadow:0 0 14px #00f3ff0b;
+}
+.panel h2{
+  color:var(--accent-cyan);
+  font-size:14px;
+  margin:0 0 12px;
+}
+.eyebrow{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1px;
+  margin-bottom:8px;
+}
+.hero{
+  background:
+    radial-gradient(circle at 90% 10%,#00f3ff1c,transparent 38%),
+    linear-gradient(135deg,#0a1d31,#06101d);
+  border:1px solid #126078;
+}
+.hero-title{
+  font-size:12px;
+  color:var(--muted);
+}
+.hero-value{
+  color:var(--accent-green);
+  font-size:28px;
+  font-weight:bold;
+  margin:7px 0;
+  overflow-wrap:anywhere;
+}
+.hero-sub{
+  font-size:11px;
+  color:var(--muted);
+}
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.stat{
+  min-width:0;
+  padding:11px 8px;
+  background:#061321;
+  border:1px solid var(--border);
+  border-radius:8px;
+}
+.stat small{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+}
+.stat strong{
+  display:block;
+  margin-top:7px;
+  font-size:16px;
+  color:var(--accent-cyan);
+  overflow-wrap:anywhere;
+}
+.stat.income strong{color:var(--accent-green)}
+.stat.expense strong{color:#ff718e}
+.stat.gold strong{color:var(--accent-gold)}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.field{min-width:0}
+.field.full{grid-column:1/-1}
+label{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  margin-bottom:5px;
+}
+input,select,textarea{
+  display:block;
+  width:100%;
+  min-width:0;
+  padding:10px 8px;
+  border:1px solid #1b465c;
+  border-radius:6px;
+  outline:none;
+  background:#030d19;
+  color:var(--text);
+  font-size:13px;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--accent-cyan);
+  box-shadow:0 0 7px #00f3ff33;
+}
+button{
+  border:0;
+  border-radius:6px;
+  padding:10px 12px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:12px;
+}
+.btn-green{background:var(--accent-green);color:#001b0b}
+.btn-cyan{background:var(--accent-cyan);color:#001318}
+.btn-red{background:#401321;color:#ff8ba5;border:1px solid var(--accent-red)}
+.btn-gold{background:var(--accent-gold);color:#211900}
+.button-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.filter-chips{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:2px 0 8px;
+}
+.chip{
+  flex-shrink:0;
+  padding:7px 10px;
+  color:var(--muted);
+  border:1px solid var(--border);
+  background:#061321;
+  border-radius:20px;
+  font-size:11px;
+}
+.chip.active{
+  color:var(--accent-cyan);
+  border-color:var(--accent-cyan);
+  background:#06313a;
+}
+.ledger-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.ledger-item{
+  padding:10px;
+  border:1px solid #173449;
+  border-radius:8px;
+  background:#061321;
+}
+.ledger-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:8px;
+}
+.ledger-name{
+  font-size:13px;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.ledger-meta{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:5px;
+  line-height:1.5;
+}
+.ledger-amount{
+  flex-shrink:0;
+  font-size:13px;
+  font-weight:bold;
+  text-align:right;
+}
+.ledger-amount.in{color:var(--accent-green)}
+.ledger-amount.out{color:#ff718e}
+.ledger-amount.neutral{color:var(--accent-gold)}
+.badge{
+  display:inline-block;
+  padding:4px 6px;
+  border-radius:4px;
+  font-size:9px;
+  border:1px solid var(--border);
+  color:var(--muted);
+  margin-top:6px;
+}
+.total-line{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid #173449;
+  font-size:12px;
+}
+.total-line strong{color:var(--accent-green)}
+.status{font-size:12px;margin-top:10px;min-height:17px}
+.status.ok{color:var(--accent-green)}
+.status.error{color:#ff718e}
+.notice{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.5;
+  margin-top:8px;
+}
+.empty{
+  text-align:center;
+  color:var(--muted);
+  padding:20px 10px;
+  font-size:12px;
+}
+.footer-note{
+  color:var(--muted);
+  font-size:10px;
+  text-align:center;
+  padding:8px 0 3px;
+}
+@media(max-width:380px){
+  .main-scroll{padding:9px}
+  .panel{padding:10px}
+  .grid{grid-template-columns:1fr}
+  .field.full{grid-column:auto}
+  .header h1{font-size:17px}
+  .hero-value{font-size:24px}
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<header class="header">
+  <div class="brand">
+    <h1>⚡ NEXUS · LEDGER</h1>
+    <span class="live-indicator">● LOCAL LIVE</span>
+  </div>
+  <small>Financial Intelligence & Transaction Control</small>
+
+  <nav class="nav">
+    <a href="index.html">Dashboard</a>
+    <a href="calculator_lock.html">Billing</a>
+    <a href="inventory.html">Inventory</a>
+    <a href="purchase.html">Purchase</a>
+    <a href="udhaar.html">Udhaar</a>
+    <a class="active" href="ledger.html">Ledger</a>
+  </nav>
+</header>
+
+<main class="main-scroll">
+<div class="container">
+
+<section class="panel hero">
+  <div class="eyebrow">NET CASH MOVEMENT</div>
+  <div class="hero-title">कुल नेट कैश बैलेंस</div>
+  <div class="hero-value" id="netCash">₹0.00</div>
+  <div class="hero-sub" id="ledgerPeriod">सभी उपलब्ध लेन-देन का सारांश</div>
+</section>
+
+<section class="panel">
+  <h2>📡 FINANCIAL OVERVIEW</h2>
+
+  <div class="summary-grid">
+    <div class="stat income">
+      <small>कुल कैश आवक</small>
+      <strong id="totalIn">₹0.00</strong>
+    </div>
+    <div class="stat expense">
+      <small>कुल कैश जावक</small>
+      <strong id="totalOut">₹0.00</strong>
+    </div>
+    <div class="stat gold">
+      <small>ग्राहक से बाकी लेना</small>
+      <strong id="customerReceivable">₹0.00</strong>
+    </div>
+    <div class="stat">
+      <small>सप्लायर को बाकी देना</small>
+      <strong id="supplierPayable">₹0.00</strong>
+    </div>
+  </div>
+
+  <p class="notice">
+    कैश आवक-जावक में केवल वास्तविक प्राप्ति और भुगतान गिने जाते हैं।
+    उधार और बाकी रकम अलग दिखाई जाती है।
+  </p>
+</section>
+
+<section class="panel">
+  <h2>➕ MANUAL TRANSACTION</h2>
+
+  <div class="grid">
+    <div class="field">
+      <label>लेन-देन का प्रकार *</label>
+      <select id="manualType">
+        <option value="income">अन्य आमदनी</option>
+        <option value="expense">दुकान का खर्च</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>रकम (₹) *</label>
+      <input id="manualAmount" type="number" min="0.01" step="0.01" placeholder="0.00">
+    </div>
+
+    <div class="field">
+      <label>कैटेगरी *</label>
+      <select id="manualCategory">
+        <option value="Other Income">अन्य आमदनी</option>
+        <option value="Rent">किराया</option>
+        <option value="Electricity">बिजली बिल</option>
+        <option value="Salary">वेतन</option>
+        <option value="Transport">ट्रांसपोर्ट</option>
+        <option value="Repair">मरम्मत</option>
+        <option value="Packaging">पैकिंग</option>
+        <option value="Other Expense">अन्य खर्च</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>तारीख *</label>
+      <input id="manualDate" type="date">
+    </div>
+
+    <div class="field full">
+      <label>विवरण *</label>
+      <input id="manualDescription" placeholder="किस काम का पैसा आया या खर्च हुआ?">
+    </div>
+
+    <div class="field">
+      <label>भुगतान माध्यम</label>
+      <select id="manualMode">
+        <option value="Cash">Cash</option>
+        <option value="UPI">UPI</option>
+        <option value="Bank">Bank</option>
+        <option value="Other">अन्य</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-green" type="button" onclick="saveManualEntry()">＋ एंट्री सेव करें</button>
+    <button class="btn-red" type="button" onclick="clearManualForm()">साफ करें</button>
+  </div>
+
+  <div id="manualMessage" class="status"></div>
+</section>
+
+<section class="panel">
+  <h2>🔍 TRANSACTION CONTROL</h2>
+
+  <div class="grid">
+    <div class="field full">
+      <label>नाम / विवरण खोजें</label>
+      <input id="searchText" type="search" placeholder="ग्राहक, सप्लायर या विवरण">
+    </div>
+
+    <div class="field">
+      <label>शुरुआती तारीख</label>
+      <input id="fromDate" type="date">
+    </div>
+
+    <div class="field">
+      <label>अंतिम तारीख</label>
+      <input id="toDate" type="date">
+    </div>
+  </div>
+
+  <div class="filter-chips" id="filterChips">
+    <button class="chip active" data-filter="all" type="button">सभी</button>
+    <button class="chip" data-filter="income" type="button">आवक</button>
+    <button class="chip" data-filter="expense" type="button">जावक</button>
+    <button class="chip" data-filter="purchase" type="button">खरीद</button>
+    <button class="chip" data-filter="customer" type="button">ग्राहक</button>
+    <button class="chip" data-filter="supplier" type="button">सप्लायर</button>
+    <button class="chip" data-filter="manual" type="button">मैनुअल</button>
+  </div>
+
+  <div class="button-row">
+    <button class="btn-cyan" type="button" onclick="applyFilters()">फिल्टर लगाएँ</button>
+    <button class="btn-red" type="button" onclick="resetFilters()">रीसेट</button>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>📒 LIVE TRANSACTION LEDGER</h2>
+  <div class="total-line">
+    <span>दिखाई गई एंट्री</span>
+    <strong id="visibleCount">0</strong>
+  </div>
+  <div class="ledger-list" id="ledgerList">
+    <div class="empty">अभी कोई लेन-देन उपलब्ध नहीं है</div>
+  </div>
+</section><section class="panel">
+  <h2>📤 REPORT & DATA CONTROL</h2>
+
+  <div class="button-row">
+    <button class="btn-cyan" type="button" onclick="exportCSV()">CSV रिपोर्ट डाउनलोड</button>
+    <button class="btn-gold" type="button" onclick="refreshLedger()">डेटा रिफ्रेश</button>
+  </div>
+
+  <div id="dataStatus" class="status"></div>
+
+  <p class="notice">
+    CSV रिपोर्ट में फिल्टर के अनुसार दिखाई जा रही एंट्रियाँ निकलेंगी।
+    यह रिपोर्ट Excel में खोली जा सकती है।
+  </p>
+</section>
+
+<div class="footer-note">
+  NEXUS POS · LOCAL FINANCIAL RECORDS
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+"use strict";
+
+/* STORAGE KEYS */
+const PURCHASE_KEY = "nexus_purchase_test_v1";
+const UDHAAR_KEY = "nexus_udhaar_test_v1";
+const MANUAL_KEY = "nexus_ledger_manual_v1";
+
+/* APP STATE */
+let purchases = [];
+let udhaarEntries = [];
+let manualEntries = [];
+let allTransactions = [];
+let visibleTransactions = [];
+let activeFilter = "all";
+
+const $ = id => document.getElementById(id);
+
+/* HELPERS */
+function todayLocal(){
+  const d = new Date();
+  return d.getFullYear() + "-" +
+    String(d.getMonth()+1).padStart(2,"0") + "-" +
+    String(d.getDate()).padStart(2,"0");
+}
+
+function money(value){
+  return "₹" + (Number(value) || 0).toFixed(2);
+}
+
+function safeNumber(value){
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function cleanName(value){
+  return String(value || "").trim().replace(/\s+/g," ");
+}
+
+function readArray(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return [];
+
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(error){
+    console.error("Read error:",key,error);
+    return [];
+  }
+}
+
+function saveArray(key,data){
+  try{
+    localStorage.setItem(key,JSON.stringify(data));
+    return true;
+  }catch(error){
+    console.error("Save error:",key,error);
+    return false;
+  }
+}
+
+function setStatus(id,message,type){
+  const element = $(id);
+  element.textContent = message;
+  element.className = "status " + type;
+}
+
+function validDate(date){
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(date || ""));
+}
+
+function makeTransaction(data){
+  return {
+    id:String(data.id || ""),
+    date:validDate(data.date) ? data.date : "",
+    title:String(data.title || "लेन-देन"),
+    detail:String(data.detail || ""),
+    type:data.type || "neutral",
+    filter:data.filter || "all",
+    amount:safeNumber(data.amount),
+    source:data.source || "unknown",
+    mode:String(data.mode || ""),
+    cashEffect:safeNumber(data.cashEffect)
+  };
+}
+
+/* LOAD SOURCE DATA */
+function refreshLedger(){
+  purchases = readArray(PURCHASE_KEY);
+  udhaarEntries = readArray(UDHAAR_KEY);
+  manualEntries = readArray(MANUAL_KEY);
+
+  buildTransactions();
+  calculateOverview();
+  applyFilters();
+
+  setStatus(
+    "dataStatus",
+    "✓ Purchase, Udhaar और Manual Ledger डेटा रिफ्रेश हो गया",
+    "ok"
+  );
+}
+
+/* BUILD LEDGER FROM SOURCE RECORDS */
+function buildTransactions(){
+  const rows = [];
+
+  purchases.forEach((purchase,index) => {
+    if(!purchase || typeof purchase !== "object") return;
+
+    const supplier = cleanName(
+      purchase.supplier || purchase.supplierName || "अज्ञात सप्लायर"
+    );
+
+    const total = safeNumber(purchase.total);
+    const paid = safeNumber(purchase.paid);
+    const due = safeNumber(purchase.due);
+    const date = purchase.date || "";
+
+    if(total < 0 || paid < 0 || due < 0) return;
+
+    const id = String(purchase.id || "purchase-" + index);
+
+    /* Purchase bill is informational, not a second cash outflow. */
+    rows.push(makeTransaction({
+      id:id + "-bill",
+      date:date,
+      title:"Purchase Bill · " + supplier,
+      detail:"खरीद बिल दर्ज · बिल रकम " + money(total) +
+        " · बाकी " + money(due),
+      type:"neutral",
+      filter:"purchase",
+      amount:total,
+      source:"purchase",
+      mode:"बिल रिकॉर्ड",
+      cashEffect:0
+    }));
+
+    /* Only actual initial payment is cash outflow. */
+    if(paid > 0){
+      rows.push(makeTransaction({
+        id:id + "-paid",
+        date:date,
+        title:"Purchase Payment · " + supplier,
+        detail:"खरीद बिल पर भुगतान",
+        type:"out",
+        filter:"purchase",
+        amount:paid,
+        source:"purchase",
+        mode:purchase.paymentMode || "",
+        cashEffect:-paid
+      }));
+    }
+  });
+
+  udhaarEntries.forEach((entry,index) => {
+    if(!entry || typeof entry !== "object") return;
+
+    const amount = safeNumber(entry.amount);
+    if(amount <= 0) return;
+
+    const name = cleanName(entry.name || "अज्ञात नाम");
+    const date = entry.date || "";
+    const id = String(entry.id || "udhaar-" + index);
+
+    if(entry.type === "customer_credit"){
+      rows.push(makeTransaction({
+        id:id,
+        date:date,
+        title:"ग्राहक उधार · " + name,
+        detail:entry.note || "ग्राहक को उधार दर्ज",
+        type:"neutral",
+        filter:"customer",
+        amount:amount,
+        source:"udhaar",
+        mode:"उधार",
+        cashEffect:0
+      }));
+    }
+
+    else if(entry.type === "customer_collection"){
+      rows.push(makeTransaction({
+        id:id,
+        date:date,
+        title:"ग्राहक वसूली · " + name,
+        detail:entry.note || "ग्राहक से पैसा प्राप्त",
+        type:"in",
+        filter:"customer",
+        amount:amount,
+        source:"udhaar",
+        mode:entry.mode || "प्राप्ति",
+        cashEffect:amount
+      }));
+    }
+
+    else if(entry.type === "supplier_payment"){
+      rows.push(makeTransaction({
+        id:id,
+        date:date,
+        title:"सप्लायर भुगतान · " + name,
+        detail:entry.note || "सप्लायर को भुगतान",
+        type:"out",
+        filter:"supplier",
+        amount:amount,
+        source:"udhaar",
+        mode:entry.mode || "भुगतान",
+        cashEffect:-amount
+      }));
+    }
+  });
+
+  manualEntries.forEach((entry,index) => {
+    if(!entry || typeof entry !== "object") return;
+
+    const amount = safeNumber(entry.amount);
+    if(amount <= 0) return;
+
+    const isIncome = entry.type === "income";
+
+    if(!isIncome && entry.type !== "expense") return;
+
+    rows.push(makeTransaction({
+      id:String(entry.id || "manual-" + index),
+      date:entry.date || "",
+      title:(isIncome ? "अन्य आमदनी · " : "दुकान खर्च · ") +
+        cleanName(entry.description || "विवरण नहीं"),
+      detail:entry.category || "Manual Entry",
+      type:isIncome ? "in" : "out",
+      filter:"manual",
+      amount:amount,
+      source:"manual",
+      mode:entry.mode || "",
+      cashEffect:isIncome ? amount : -amount
+    }));
+  });
+
+  allTransactions = rows.sort((a,b) => {
+    const dateCompare = String(b.date).localeCompare(String(a.date));
+    if(dateCompare !== 0) return dateCompare;
+    return String(b.id).localeCompare(String(a.id));
+  });
+}
+
+/* CUSTOMER AND SUPPLIER OUTSTANDING */
+function calculateOutstanding(){
+  const customers = new Map();
+  const suppliers = new Map();
+
+  udhaarEntries.forEach(entry => {
+    if(!entry || typeof entry !== "object") return;
+
+    const name = cleanName(entry.name);
+    const key = name.toLowerCase();
+    const amount = safeNumber(entry.amount);
+
+    if(!key || amount <= 0) return;
+
+    if(entry.type === "customer_credit" ||
+       entry.type === "customer_collection"){
+
+      if(!customers.has(key)){
+        customers.set(key,{credit:0,collection:0});
+      }
+
+      const customer = customers.get(key);
+
+      if(entry.type === "customer_credit"){
+        customer.credit += amount;
+      }else{
+        customer.collection += amount;
+      }
+    }
+
+    if(entry.type === "supplier_payment"){
+      if(!suppliers.has(key)){
+        suppliers.set(key,{paid:0});
+      }
+      suppliers.get(key).paid += amount;
+    }
+  });
+
+  purchases.forEach(purchase => {
+    if(!purchase || typeof purchase !== "object") return;
+
+    const name = cleanName(
+      purchase.supplier || purchase.supplierName || ""
+    );
+
+    const key = name.toLowerCase();
+    if(!key) return;
+
+    if(!suppliers.has(key)){
+      suppliers.set(key,{paid:0});
+    }
+
+    suppliers.get(key).purchaseDue += safeNumber(purchase.due);
+  });
+
+  let receivable = 0;
+  let payable = 0;
+
+  customers.forEach(customer => {
+    receivable += Math.max(
+      0,customer.credit-customer.collection
+    );
+  });
+
+  suppliers.forEach(supplier => {
+    payable += Math.max(
+      0,(supplier.purchaseDue || 0)-supplier.paid
+    );
+  });
+
+  return {receivable,payable};
+}
+
+/* DASHBOARD TOTALS */
+function calculateOverview(){
+  let totalIn = 0;
+  let totalOut = 0;
+
+  allTransactions.forEach(row => {
+    if(row.cashEffect > 0) totalIn += row.cashEffect;
+    if(row.cashEffect < 0) totalOut += Math.abs(row.cashEffect);
+  });
+
+  const outstanding = calculateOutstanding();
+  const net = totalIn-totalOut;
+
+  $("totalIn").textContent = money(totalIn);
+  $("totalOut").textContent = money(totalOut);
+  $("netCash").textContent = money(net);
+  $("customerReceivable").textContent =
+    money(outstanding.receivable);
+  $("supplierPayable").textContent =
+    money(outstanding.payable);
+
+  $("ledgerPeriod").textContent =
+    allTransactions.length + " उपलब्ध लेन-देन · " +
+    "कुल कैश आवक - कुल कैश जावक";
+}
+
+/* FILTERS */
+document.querySelectorAll("#filterChips .chip").forEach(button => {
+  button.addEventListener("click",() => {
+    activeFilter = button.dataset.filter || "all";
+
+    document.querySelectorAll("#filterChips .chip").forEach(chip => {
+      chip.classList.toggle("active",chip === button);
+    });
+
+    applyFilters();
+  });
+});
+
+function applyFilters(){
+  const search = $("searchText").value.trim().toLowerCase();
+  const from = $("fromDate").value;
+  const to = $("toDate").value;
+
+  if(from && to && from > to){
+    setStatus(
+      "dataStatus",
+      "शुरुआती तारीख अंतिम तारीख से आगे नहीं हो सकती",
+      "error"
+    );
+    return;
+  }
+
+  visibleTransactions = allTransactions.filter(row => {
+    if(activeFilter === "income" && row.cashEffect <= 0) return false;
+    if(activeFilter === "expense" && row.cashEffect >= 0) return false;
+
+    if(activeFilter === "purchase" && row.filter !== "purchase") return false;
+    if(activeFilter === "customer" && row.filter !== "customer") return false;
+    if(activeFilter === "supplier" && row.filter !== "supplier") return false;
+    if(activeFilter === "manual" && row.filter !== "manual") return false;
+
+    if(from && (!row.date || row.date < from)) return false;
+    if(to && (!row.date || row.date > to)) return false;
+
+    const haystack = (
+      row.title + " " + row.detail + " " + row.mode
+    ).toLowerCase();
+
+    if(search && !haystack.includes(search)) return false;
+
+    return true;
+  });
+
+  renderTransactions();
+}
+
+function resetFilters(){
+  $("searchText").value = "";
+  $("fromDate").value = "";
+  $("toDate").value = "";
+
+  activeFilter = "all";
+
+  document.querySelectorAll("#filterChips .chip").forEach(chip => {
+    chip.classList.toggle(
+      "active",
+      chip.dataset.filter === "all"
+    );
+  });
+
+  applyFilters();
+}
+
+function renderTransactions(){
+  const list = $("ledgerList");
+  list.innerHTML = "";
+
+  $("visibleCount").textContent = visibleTransactions.length;
+
+  if(visibleTransactions.length === 0){
+    list.innerHTML =
+      '<div class="empty">इस फिल्टर में कोई लेन-देन नहीं मिला</div>';
+    return;
+  }
+
+  visibleTransactions.forEach(row => {
+    const item = document.createElement("div");
+    item.className = "ledger-item";
+
+    const top = document.createElement("div");
+    top.className = "ledger-top";
+
+    const left = document.createElement("div");
+
+    const title = document.createElement("div");
+    title.className = "ledger-name";
+    title.textContent = row.title;
+
+    const detail = document.createElement("div");
+    detail.className = "ledger-meta";
+    detail.textContent =
+      (row.date || "तारीख उपलब्ध नहीं") +
+      (row.detail ? " · " + row.detail : "");
+
+    left.append(title,detail);
+
+    const amount = document.createElement("div");
+    amount.className = "ledger-amount";
+
+    if(row.cashEffect > 0){
+      amount.classList.add("in");
+      amount.textContent = "+" + money(row.amount);
+    }else if(row.cashEffect < 0){
+      amount.classList.add("out");
+      amount.textContent = "-" + money(row.amount);
+    }else{
+      amount.classList.add("neutral");
+      amount.textContent = money(row.amount);
+    }
+
+    top.append(left,amount);
+
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent =
+      row.mode || (row.cashEffect === 0 ? "Non-cash record" : "Cash movement");
+
+    item.append(top,badge);
+    list.appendChild(item);
+  });
+}
+
+/* MANUAL TRANSACTIONS */
+function saveManualEntry(){
+  const type = $("manualType").value;
+  const amount = Number($("manualAmount").value);
+  const category = $("manualCategory").value;
+  const date = $("manualDate").value;
+  const description = $("manualDescription").value.trim();
+  const mode = $("manualMode").value;
+
+  if(!Number.isFinite(amount) || amount <= 0){
+    setStatus("manualMessage","रकम शून्य से अधिक डालें","error");
+    return;
+  }
+
+  if(!validDate(date)){
+    setStatus("manualMessage","सही तारीख चुनें","error");
+    return;
+  }
+
+  if(!description){
+    setStatus("manualMessage","विवरण लिखना जरूरी है","error");
+    return;
+  }
+
+  const entry = {
+    id:"MAN-" + Date.now() + "-" +
+      Math.random().toString(36).slice(2,7),
+    type:type,
+    amount:amount,
+    category:category,
+    date:date,
+    description:description,
+    mode:mode,
+    createdAt:new Date().toISOString()
+  };
+
+  const next = manualEntries.concat(entry);
+
+  if(!saveArray(MANUAL_KEY,next)){
+    setStatus(
+      "manualMessage",
+      "एंट्री सेव नहीं हुई। ब्राउज़र Storage की जगह जाँचें।",
+      "error"
+    );
+    return;
+  }
+
+  manualEntries = next;
+  buildTransactions();
+  calculateOverview();
+  applyFilters();
+
+  $("manualAmount").value = "";
+  $("manualDescription").value = "";
+
+  setStatus("manualMessage","✓ लेन-देन सेव हो गया","ok");
+}
+
+function clearManualForm(){
+  $("manualAmount").value = "";
+  $("manualDescription").value = "";
+  $("manualType").value = "income";
+  $("manualCategory").value = "Other Income";
+  $("manualMode").value = "Cash";
+  $("manualDate").value = todayLocal();
+  $("manualMessage").textContent = "";
+}
+
+/* CSV EXPORT */
+function csvCell(value){
+  let text = String(value ?? "");
+
+  if(/^[=+\-@\t\r]/.test(text)){
+    text = "'" + text;
+  }
+
+  return '"' + text.replace(/"/g,'""') + '"';
+}
+
+function exportCSV(){
+  if(visibleTransactions.length === 0){
+    setStatus("dataStatus","डाउनलोड करने के लिए कोई एंट्री नहीं है","error");
+    return;
+  }
+
+  const header = [
+    "Date",
+    "Transaction",
+    "Details",
+    "Amount",
+    "Cash Effect",
+    "Mode",
+    "Source"
+  ];
+
+  const lines = [header.map(csvCell).join(",")];
+
+  visibleTransactions.forEach(row => {
+    lines.push([
+      row.date,
+      row.title,
+      row.detail,
+      row.amount.toFixed(2),
+      row.cashEffect.toFixed(2),
+      row.mode,
+      row.source
+    ].map(csvCell).join(","));
+  });
+
+  const csv = "\uFEFF" + lines.join("\r\n");
+  const blob = new Blob([csv],{
+    type:"text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "nexus-ledger-" + todayLocal() + ".csv";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url),1000);
+
+  setStatus("dataStatus","✓ CSV रिपोर्ट तैयार हो गई","ok");
+}
+
+/* INITIALIZE */
+$("manualDate").value = todayLocal();
+
+$("searchText").addEventListener("input",applyFilters);
+$("fromDate").addEventListener("change",applyFilters);
+$("toDate").addEventListener("change",applyFilters);
+
+/* Refresh when another same-origin POS page changes storage. */
+window.addEventListener("storage",event => {
+  if(
+    event.key === PURCHASE_KEY ||
+    event.key === UDHAAR_KEY ||
+    event.key === MANUAL_KEY
+  ){
+    refreshLedger();
+  }
+});
+
+window.addEventListener("focus",refreshLedger);
+
+refreshLedger();
+</script>
+</body>
+</html>

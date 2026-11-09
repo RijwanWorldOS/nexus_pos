@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS POS - Inventory Management</title>
+
+<style>
+:root {
+    --bg-primary: #030712;
+    --bg-card: #081423;
+    --accent-cyan: #00f3ff;
+    --accent-green: #00ff66;
+    --accent-gold: #f1c40f;
+    --accent-red: #ff3366;
+    --text-main: #f0f6fc;
+    --text-muted: #8b949e;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: var(--bg-primary);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 4px;
+}
+
+.app-frame {
+    width: 100%;
+    max-width: 480px;
+    min-height: 98vh;
+    background: var(--bg-card);
+    border: 2.5px solid var(--accent-green);
+    border-radius: 18px;
+    padding: 8px;
+    box-shadow: 0 25px 60px rgba(0,255,102,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.brand-header {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--accent-cyan);
+    text-transform: uppercase;
+    text-align: center;
+    padding: 8px 5px;
+    background: rgba(0,243,255,0.08);
+    border-radius: 6px;
+    border: 1.5px solid rgba(0,243,255,0.3);
+}
+
+.master-hub-bar {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    background: rgba(0,255,102,0.08);
+    border: 1.5px solid rgba(0,255,102,0.35);
+    border-radius: 8px;
+    padding: 5px;
+}
+
+.master-hub-btn {
+    flex: 1;
+    background: #030712;
+    color: var(--accent-green);
+    border: 1.5px solid var(--accent-green);
+    font-size: 9px;
+    font-weight: bold;
+    padding: 7px 3px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+.master-hub-btn.active {
+    background: rgba(0,243,255,0.15);
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+}
+
+.running-marquee-box {
+    background: rgba(0,255,102,0.12);
+    border: 1.5px solid rgba(0,255,102,0.4);
+    border-radius: 6px;
+    padding: 5px;
+    color: var(--accent-green);
+    font-size: 9px;
+    text-align: center;
+}
+
+.top-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid rgba(0,243,255,0.25);
+    padding-bottom: 6px;
+    gap: 4px;
+}
+
+.tool-btn {
+    background: #0b1d3a;
+    color: var(--accent-cyan);
+    border: 1.5px solid rgba(0,243,255,0.4);
+    padding: 7px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.section-title {
+    color: var(--accent-cyan);
+    font-size: 12px;
+    font-weight: 900;
+    padding: 7px;
+    border-bottom: 1px solid rgba(0,243,255,0.25);
+}
+
+.panel {
+    background: #040914;
+    border: 1.5px solid rgba(0,243,255,0.35);
+    border-radius: 10px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.form-group label {
+    font-size: 9px;
+    font-weight: bold;
+    color: var(--text-muted);
+}
+
+input, select {
+    width: 100%;
+    background: #030712;
+    border: 1.5px solid rgba(0,243,255,0.4);
+    color: #fff;
+    font-size: 11px;
+    padding: 9px 7px;
+    border-radius: 6px;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent-green);
+}
+
+input::placeholder {
+    color: #687386;
+}
+
+.row {
+    display: flex;
+    gap: 6px;
+}
+
+.action-btn {
+    background: linear-gradient(135deg, #00f3ff, #00ff66);
+    color: #030712;
+    border: none;
+    padding: 10px;
+    border-radius: 7px;
+    font-size: 10px;
+    font-weight: 900;
+    cursor: pointer;
+    width: 100%;
+}
+
+.secondary-btn {
+    background: #0b1d3a;
+    color: var(--accent-cyan);
+    border: 1px solid var(--accent-cyan);
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.danger-btn {
+    background: rgba(255,51,102,0.15);
+    color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.stat-box {
+    background: #071120;
+    border: 1px solid rgba(0,255,102,0.3);
+    border-radius: 7px;
+    padding: 8px 4px;
+    text-align: center;
+}
+
+.stat-box small {
+    color: var(--text-muted);
+    font-size: 8px;
+    display: block;
+}
+
+.stat-box strong {
+    color: var(--accent-green);
+    font-size: 13px;
+    display: block;
+    margin-top: 4px;
+}
+
+.search-box {
+    background: #030712;
+    border: 1.5px solid rgba(0,243,255,0.4);
+    border-radius: 7px;
+    padding: 3px 7px;
+}
+
+.search-box input {
+    border: none;
+    padding: 7px 2px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid rgba(0,243,255,0.25);
+    border-radius: 7px;
+}
+
+table {
+    width: 100%;
+    min-width: 440px;
+    border-collapse: collapse;
+    font-size: 9px;
+}
+
+th {
+    background: #0b1d3a;
+    color: var(--accent-cyan);
+    padding: 9px 6px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+td {
+    padding: 8px 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-main);
+}
+
+.edit-btn {
+    background: rgba(0,243,255,0.12);
+    color: var(--accent-cyan);
+    border: 1px solid var(--accent-cyan);
+    padding: 5px 7px;
+    border-radius: 5px;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 20px 5px;
+    font-size: 10px;
+}
+
+.note {
+    color: var(--text-muted);
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+#formMode {
+    color: var(--accent-gold);
+    font-size: 9px;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 8px;
+    padding: 5px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app-frame">
+
+    <div class="brand-header">
+        ⚡ NEXUS POS · INVENTORY CONTROL ⚡
+    </div>
+
+    <div class="master-hub-bar">
+        <a href="index.html" class="master-hub-btn">🏠 होम</a>
+        <a href="calculator_lock.html" class="master-hub-btn">🧾 बिलिंग</a>
+        <a href="inventory.html" class="master-hub-btn active">📦 स्टॉक</a>
+    </div>
+
+    <div class="running-marquee-box">
+        🛡️ MY SHOP INVENTORY · PRODUCT DNA MANAGEMENT
+    </div>
+
+    <div class="top-toolbar">
+        <span style="font-size:10px;color:var(--accent-gold);font-weight:bold;">
+            📦 दुकान का स्टॉक मैनेजमेंट
+        </span>
+        <button class="tool-btn" onclick="resetForm()">➕ नया प्रोडक्ट</button>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <small>कुल प्रोडक्ट</small>
+            <strong id="totalProducts">0</strong>
+        </div>
+        <div class="stat-box">
+            <small>कुल स्टॉक</small>
+            <strong id="totalStock">0</strong>
+        </div>
+        <div class="stat-box">
+            <small>कम स्टॉक</small>
+            <strong id="lowStock">0</strong>
+        </div>
+    </div>
+
+    <div class="panel">
+
+        <div class="section-title">
+            🧬 PRODUCT DNA · प्रोडक्ट रजिस्ट्रेशन
+        </div>
+
+        <div id="formMode">नया प्रोडक्ट दर्ज करें</div>
+
+        <form id="productForm">
+
+            <div class="form-group">
+                <label>प्रोडक्ट का नाम *</label>
+                <input type="text" id="productName"
+                    placeholder="जैसे: साबुन 100 ग्राम"
+                    required>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>बारकोड नंबर</label>
+                    <input type="text" id="barcode"
+                        placeholder="Barcode Number">
+                </div>
+
+                <div class="form-group">
+                    <label>ब्रांड</label>
+                    <input type="text" id="brand"
+                        placeholder="Brand Name">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>खरीद कीमत ₹</label>
+                    <input type="number" id="purchasePrice"
+                        min="0" step="0.01" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>MRP ₹</label>
+                    <input type="number" id="mrp"
+                        min="0" step="0.01" value="0">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>अपनी बिक्री कीमत ₹ *</label>
+                    <input type="number" id="salePrice"
+                        min="0" step="0.01" value="0" required>
+                </div>
+
+                <div class="form-group">
+                    <label>मौजूदा स्टॉक *</label>
+                    <input type="number" id="stock"
+                        min="0" step="0.001" value="0" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group">
+                    <label>स्टॉक यूनिट</label>
+                    <select id="unit">
+                        <option value="Piece">Piece / नग</option>
+                        <option value="Packet">Packet / पैकेट</option>
+                        <option value="Kg">Kilogram / किलो</option>
+                        <option value="Gram">Gram / ग्राम</option>
+                        <option value="Liter">Liter / लीटर</option>
+                        <option value="ML">ML / मिलीलीटर</option>
+                        <option value="Box">Box / डिब्बा</option>
+                        <option value="Dozen">Dozen / दर्जन</option>
+                        <option value="Pair">Pair / जोड़ी</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>कैटेगरी</label>
+                    <input type="text" id="category"
+                        placeholder="जैसे किराना">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>प्रोडक्ट विवरण</label>
+                <input type="text" id="description"
+                    placeholder="साइज, वजन या अन्य जानकारी">
+            </div>
+
+            <button type="submit" class="action-btn" id="saveButton">
+                ✅ PRODUCT SAVE करें
+            </button>
+
+            <button type="button" class="secondary-btn"
+                onclick="resetForm()">
+                नया फॉर्म / Cancel Edit
+            </button>
+
+        </form>
+
+        <p class="note">
+            नोट: बारकोड नंबर से अपने-आप नाम या कीमत मिलने की गारंटी नहीं है।
+            यहाँ दर्ज जानकारी तुम्हारे ब्राउज़र में सेव होगी।
+        </p>
+
+    </div>
+
+    <div class="panel">
+
+        <div class="section-title">
+            🔍 MY SHOP PRODUCT DATABASE
+        </div>
+
+        <div class="search-box">
+            <input type="search" id="searchInput"
+                placeholder="नाम, ब्रांड या बारकोड खोजें...">
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>प्रोडक्ट</th>
+                        <th>बारकोड</th>
+                        <th>स्टॉक</th>
+                        <th>खरीद</th>
+                        <th>बिक्री</th>
+                        <th>एक्शन</th>
+                    </tr>
+                </thead>
+                <tbody id="productTableBody">
+                    <tr>
+                        <td colspan="6" class="empty-message">
+                            अभी कोई प्रोडक्ट सेव नहीं है।
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <footer>
+        NEXUS POS · INVENTORY MODULE · LOCAL TEST VERSION
+    </footer>
+
+</div>
+
+<script>
+"use strict";
+
+/* =====================================
+   NEXUS POS INVENTORY DATABASE
+   TEST STORAGE - OLD POS DATA SAFE
+===================================== */
+
+const STORAGE_KEY = "nexus_inventory_test_v1";
+
+let products = [];
+let editingProductId = null;
+
+const $ = id => document.getElementById(id);
+
+
+/* =====================================
+   DATABASE LOAD
+===================================== */
+
+function loadProducts() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        products = saved ? JSON.parse(saved) : [];
+
+        if (!Array.isArray(products)) {
+            products = [];
+        }
+
+    } catch (error) {
+        products = [];
+        alert("डेटाबेस पढ़ने में समस्या हुई।");
+    }
+
+    renderProducts();
+}
+
+
+/* =====================================
+   DATABASE SAVE
+===================================== */
+
+function saveProducts() {
+    try {
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(products)
+        );
+
+        return true;
+
+    } catch (error) {
+        alert("डेटा सेव नहीं हो पाया। ब्राउज़र स्टोरेज जाँचें।");
+        return false;
+    }
+}
+
+
+/* =====================================
+   PRODUCT FORM SUBMIT
+===================================== */
+
+$("productForm").addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const product = {
+
+        name: $("productName").value.trim(),
+
+        barcode: $("barcode").value.trim(),
+
+        brand: $("brand").value.trim(),
+
+        purchasePrice: Number($("purchasePrice").value),
+
+        mrp: Number($("mrp").value),
+
+        salePrice: Number($("salePrice").value),
+
+        stock: Number($("stock").value),
+
+        unit: $("unit").value,
+
+        category: $("category").value.trim(),
+
+        description: $("description").value.trim(),
+
+        updatedAt: new Date().toISOString()
+
+    };
+
+
+    if (!product.name) {
+        alert("प्रोडक्ट का नाम लिखना जरूरी है।");
+        return;
+    }
+
+    const numericFields = [
+        product.purchasePrice,
+        product.mrp,
+        product.salePrice,
+        product.stock
+    ];
+
+    if (numericFields.some(value =>
+        !Number.isFinite(value) || value < 0
+    )) {
+        alert("कीमत और स्टॉक सही दर्ज करें।");
+        return;
+    }
+
+
+    /* Duplicate barcode check */
+
+    const duplicate = products.find(item =>
+        item.barcode &&
+        item.barcode === product.barcode &&
+        item.id !== editingProductId
+    );
+
+    if (duplicate) {
+        alert("यह बारकोड पहले से सेव है।");
+        return;
+    }
+
+
+    /* UPDATE EXISTING PRODUCT */
+
+    if (editingProductId) {
+
+        const index = products.findIndex(
+            item => item.id === editingProductId
+        );
+
+        if (index === -1) {
+            alert("अपडेट करने वाला प्रोडक्ट नहीं मिला।");
+            resetForm();
+            return;
+        }
+
+        products[index] = {
+            ...products[index],
+            ...product
+        };
+
+    }
+
+    /* ADD NEW PRODUCT */
+
+    else {
+
+        product.id = "NXP-" +
+            Date.now().toString(36) +
+            "-" +
+            Math.random().toString(36).slice(2, 7);
+
+        product.createdAt = new Date().toISOString();
+
+        products.push(product);
+
+    }
+
+
+    if (saveProducts()) {
+
+        alert(
+            editingProductId
+                ? "प्रोडक्ट अपडेट हो गया।"
+                : "नया प्रोडक्ट सेव हो गया।"
+        );
+
+        resetForm();
+        renderProducts();
+
+    }
+
+});
+
+
+/* =====================================
+   RENDER PRODUCT TABLE
+===================================== */
+
+function renderProducts() {
+
+    const query = $("searchInput").value
+        .trim()
+        .toLowerCase();
+
+    const filtered = products.filter(product => {
+
+        const searchable =
+            product.name + " " +
+            product.barcode + " " +
+            product.brand + " " +
+            product.category;
+
+        return searchable.toLowerCase().includes(query);
+
+    });
+
+
+    $("totalProducts").textContent = products.length;
+
+
+    const totalStock = products.reduce(
+        (sum, product) => sum + Number(product.stock || 0),
+        0
+    );
+
+    $("totalStock").textContent =
+        totalStock.toLocaleString("en-IN");
+
+
+    const lowStockCount = products.filter(
+        product => Number(product.stock) <= 5
+    ).length;
+
+    $("lowStock").textContent = lowStockCount;
+
+
+    const table = $("productTableBody");
+
+
+    if (filtered.length === 0) {
+
+        table.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-message">
+                    कोई प्रोडक्ट नहीं मिला।
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    table.innerHTML = "";
+
+
+    filtered.forEach(product => {
+
+        const row = document.createElement("tr");
+
+        const nameCell = document.createElement("td");
+        nameCell.textContent = product.name;
+
+        const barcodeCell = document.createElement("td");
+        barcodeCell.textContent = product.barcode || "-";
+
+        const stockCell = document.createElement("td");
+        stockCell.textContent =
+            product.stock + " " + product.unit;
+
+        const purchaseCell = document.createElement("td");
+        purchaseCell.textContent =
+            "₹" + Number(product.purchasePrice).toFixed(2);
+
+        const saleCell = document.createElement("td");
+        saleCell.textContent =
+            "₹" + Number(product.salePrice).toFixed(2);
+
+
+        const actionCell = document.createElement("td");
+
+        const editButton = document.createElement("button");
+
+        editButton.className = "edit-btn";
+        editButton.textContent = "✏️ Edit";
+
+        editButton.addEventListener("click", function() {
+            editProduct(product.id);
+        });
+
+        actionCell.appendChild(editButton);
+
+
+        row.appendChild(nameCell);
+        row.appendChild(barcodeCell);
+        row.appendChild(stockCell);
+        row.appendChild(purchaseCell);
+        row.appendChild(saleCell);
+        row.appendChild(actionCell);
+
+        table.appendChild(row);
+
+    });
+
+}
+
+
+/* =====================================
+   EDIT PRODUCT
+===================================== */
+
+function editProduct(productId) {
+
+    const product = products.find(
+        item => item.id === productId
+    );
+
+    if (!product) {
+        alert("प्रोडक्ट नहीं मिला।");
+        return;
+    }
+
+    editingProductId = productId;
+
+    $("productName").value = product.name || "";
+    $("barcode").value = product.barcode || "";
+    $("brand").value = product.brand || "";
+
+    $("purchasePrice").value =
+        product.purchasePrice ?? 0;
+
+    $("mrp").value = product.mrp ?? 0;
+
+    $("salePrice").value =
+        product.salePrice ?? 0;
+
+    $("stock").value = product.stock ?? 0;
+
+    $("unit").value = product.unit || "Piece";
+
+    $("category").value = product.category || "";
+
+    $("description").value =
+        product.description || "";
+
+
+    $("formMode").textContent =
+        "✏️ प्रोडक्ट अपडेट मोड";
+
+    $("saveButton").textContent =
+        "🔄 UPDATE PRODUCT";
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =====================================
+   RESET FORM
+===================================== */
+
+function resetForm() {
+
+    $("productForm").reset();
+
+    editingProductId = null;
+
+    $("purchasePrice").value = 0;
+    $("mrp").value = 0;
+    $("salePrice").value = 0;
+    $("stock").value = 0;
+
+    $("formMode").textContent =
+        "नया प्रोडक्ट दर्ज करें";
+
+    $("saveButton").textContent =
+        "✅ PRODUCT SAVE करें";
+
+}
+
+
+/* =====================================
+   SEARCH
+===================================== */
+
+$("searchInput").addEventListener(
+    "input",
+    renderProducts
+);
+
+
+/* =====================================
+   START APPLICATION
+===================================== */
+
+loadProducts();
+
+</script>
+
+</body>
+</html>
