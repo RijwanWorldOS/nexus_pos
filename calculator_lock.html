@@ -779,11 +779,17 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                 recognition.start();
             } catch(e) {}
         }
+   function switchCatalogTab(sector) {
+            if (sector !== activeSectorId) {
+                console.warn("दूसरी कैटेगरी खोलने की अनुमति नहीं है:", sector);
+                return;
+            }
 
-        function switchCatalogTab(sector) {
-            currentSector = sector;
-            loadCatalogGridForManager(sector);
+            currentSector = activeSectorId;
+            loadCatalogGridForManager(activeSectorId);
         }
+        
+        
 
        function loadCatalogGridForManager(sector) {
     const grid = document.getElementById('catalogItemsGrid');
