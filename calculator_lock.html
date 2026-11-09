@@ -84,7 +84,24 @@
             <input type="number" id="newItemPriceInput" placeholder="₹ मूल्य" style="width:45px; background:#030712; border:1.5px solid rgba(0,243,255,0.4); color:#fff; font-size:10px; padding:4px 2px; border-radius:6px; outline:none; text-align:center;" onkeydown="if(event.key==='Enter') addNewCustomCatalogItem()">
             <button class="tool-btn" onclick="addNewCustomCatalogItem()" style="background:var(--accent-green); color:#030712; border:none; padding:4px 6px;">➕</button>
         </div>
-
+<!-- Product search: place after the custom-item row, before the customer box -->
+<div style="display:flex; flex-direction:column; gap:4px;">
+    <input
+        type="search"
+        id="search-input-box"
+        placeholder="🔍 सामान खोजें या बारकोड दर्ज करें..."
+        autocomplete="off"
+        aria-label="सामान खोजें"
+        oninput="handleUniversalSearch(event)"
+        style="width:100%; background:#030712; border:1.5px solid rgba(0,243,255,0.4); color:#fff; font-size:10px; padding:6px; border-radius:6px; outline:none;"
+    >
+    <div
+        id="search-results-box"
+        role="listbox"
+        aria-label="खोज परिणाम"
+        style="max-height:180px; overflow-y:auto;"
+    ></div>
+</div>
         <!-- परमानेंट कस्टमर ऑटो-डिटेक्शन इनपुट्स -->
         <div class="customer-box">
             <label class="cust-avatar-upload" title="ग्राहक फोटो">
@@ -1213,5 +1230,6 @@ let savedBiz = activeBusiness;
             speakAiMessage(`राम-राम रिज़वान भाई! असद AI ऑटोनॉमस POS चालू हो गया है। ${welcomeJoke}`);
         };
     </script>
+  <script src="./search.js"></script>  
 </body>
 </html>
