@@ -677,8 +677,9 @@
     const logoStyle = document.getElementById('selectedLogoStyle').value;
     const gpsData = document.getElementById('gpsCoordsInput').value;
     const taxProfile = document.getElementById('setupTaxSelect').value;
-const businessModel = document.getElementById('businessModel').value;
+    const businessModel = document.getElementById('businessModel').value;
     const businessScale = document.getElementById('businessScale').value;
+
     if (!bizName || !pinCode || !phoneInput) {
         alert("दुकान का नाम, पिनकोड और मोबाइल नंबर भरना जरूरी है।");
         return;
@@ -705,80 +706,94 @@ const businessModel = document.getElementById('businessModel').value;
         return;
     }
 
-    // पुरानी दुकान की ID सुरक्षित रखें
-let uniqueCryptoNodeId = "";
-
-try {
-    const previousSetup = JSON.parse(
-        localStorage.getItem('rizwan_global_business_dna') || '{}'
-    );
-
-    uniqueCryptoNodeId = String(
-        previousSetup.cryptoNodeId || ''
-    ).trim();
-} catch (error) {
-    console.warn("पुराना Business DNA पढ़ने में समस्या:", error);
-}
-
-// केवल पहली बार ID नहीं मिलने पर नई ID बनाएँ
-if (!uniqueCryptoNodeId) {
-    if (!window.crypto || !window.crypto.getRandomValues) {
-        alert("सुरक्षित Node ID बनाने की सुविधा उपलब्ध नहीं है।");
+    if (!window.BusinessDNA) {
+        alert("Business DNA Core लोड नहीं हुआ। कृपया पेज रीफ्रेश करें।");
         return;
     }
 
-    const randomBytes = new Uint8Array(16);
-    window.crypto.getRandomValues(randomBytes);
-
-    const randomId = Array.from(randomBytes)
-        .map(byte => byte.toString(16).padStart(2, "0"))
-        .join("");
-
-    uniqueCryptoNodeId = "EB-DNA-" + pinCode + "-" + randomId;
-}
-
-    const globalSetupData = {
-        schemaVersion: 2,
-        cryptoNodeId: uniqueCryptoNodeId,
-        businessName: bizName,
-        pinCode: pinCode,
-        phone: phoneNum,
-        email: emailAddr,
-        sector: sectorVal,
-        owner: ownerName,
-        brandLogoStyle: logoStyle,
-        taxProfile: taxProfile,
-        businessModel: businessModel,
-        businessScale: businessScale,
-
-        // दुकान का पूरा डाक पता
-        addressLine: document.getElementById('setupAddressLine').value.trim(),
-        postOffice: document.getElementById('setupPostOffice').value.trim(),
-        district: document.getElementById('setupDistrict').value.trim(),
-        state: document.getElementById('setupState').value.trim(),
-        country: document.getElementById('setupCountry').value.trim(),
-
-        gpsLocation: gpsData || "",
-        biometricStatus: "not_implemented",
-        status: "saved_locally",
-        createdAt: new Date().toISOString()
-    };
-
     try {
-        localStorage.setItem(
-            'rizwan_global_business_dna',
-            JSON.stringify(globalSetupData)
-        );
+        const address = {
+            line1: document.getElementById('setupAddressLine').value.trim(),
+            postOffice: document.getElementById('setupPostOffice').value.trim(),
+            district: document.getElementById('setupDistrict').value.trim(),
+            state: document.getElementById('setupState').value.trim(),
+            country: document.getElementById('setupCountry').value.trim() || "India",
+            postalCode: pinCode,
+            gps: gpsData || ""
+        };
 
-        const savedData = localStorage.getItem(
-            'rizwan_global_business_dna'
-        );
+        // पुराने रिकॉर्ड को पहले सुरक्षित रूप से लोड करें
+        const loaded = BusinessDNA.load();
+        const currentShop = BusinessDNA.getActiveShop(loaded.registry);
 
-        if (!savedData) {
-            throw new Error("Save verification failed");
+        const shopData = {
+            businessName: bizName,
+            owner: ownerName,
+            phone: phoneNum,
+            email: emailAddr,
+            sector: sectorVal,
+            brandLogoStyle: logoStyle,
+            taxProfile: taxProfile,
+            businessModel: businessModel,
+            businessScale: businessScale,
+            address: address
+        };
+
+        let result;
+
+        // दुकान पहले से मौजूद है तो उसी को अपडेट करें
+        if (currentShop) {
+            result = BusinessDNA.updateShop(
+                currentShop.businessId,
+                shopData
+            );
+        } else {
+            // पहली बार दुकान बन रही है
+            result = BusinessDNA.createShop(shopData);
         }
 
-        const verifiedData = JSON.parse(savedData);
+        if (!result || !result.ok) {
+            throw new Error(
+                result && result.errors
+                    ? result.errors.join("\n")
+                    : "Business DNA सेव नहीं हो सका।"
+            );
+        }
+
+        // सेव हुए डेटा और पुराने POS compatibility record की जाँच
+        const savedData = JSON.parse(
+            localStorage.getItem('rizwan_global_business_dna') || 'null'
+        );
+
+        if (
+            !savedData ||
+            savedData.cryptoNodeId !== result.shop.cryptoNodeId ||
+            savedData.businessName !== bizName
+        ) {
+            throw new Error("सेव किए गए Business DNA की जाँच असफल हुई।");
+        }
+
+        alert(
+            "व्यवसाय की जानकारी सफलतापूर्वक सेव हो गई।\n\n" +
+            "Business ID: " + result.shop.businessId +
+            "\n\nडेटा इस डिवाइस में सेव है। Cloud Sync अभी कॉन्फ़िगर नहीं है।"
+        );
+
+        speakAsad("आपकी दुकान की जानकारी सफलतापूर्वक सेव हो गई है।");
+
+        setTimeout(function() {
+            window.location.href = "calculator_lock.html";
+        }, 1500);
+
+    } catch (error) {
+        console.error("Business DNA Save Error:", error);
+        alert(
+            "जानकारी सेव नहीं हो सकी।\n\n" +
+            (error.message || "कृपया दोबारा कोशिश करें।")
+        );
+    }
+}
+    
 
         if (verifiedData.cryptoNodeId !== uniqueCryptoNodeId) {
             throw new Error("Saved data verification failed");
