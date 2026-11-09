@@ -668,7 +668,7 @@ function saveCustomerEntry(){
 
   const nextEntries = entries.concat(entry);
 
-  if(!saveStorage(UDHAAR_KEY,nextEntries)){
+  if(!saveShopStorage(UDHAAR_KEY,nextEntries)){
     showStatus(
       "customerMessage",
       "एंट्री सेव नहीं हुई। ब्राउज़र Storage की जगह जाँचें।",
