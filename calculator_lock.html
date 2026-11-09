@@ -477,7 +477,7 @@ function saveShopJSON(baseKey, data) {
         // परमानेंट कस्टमर ऑटो-डिटेक्शन लॉजिक
         function checkPermanentCustomerByName(nameQuery) {
             if (!nameQuery || nameQuery.length < 2) return;
-            let savedCusts = JSON.parse(localStorage.getItem('rizwan_permanent_customers') || '{}');
+            let savedCusts = loadShopJSON('rizwan_permanent_customers', {});
             let key = nameQuery.trim().toLowerCase();
             if (savedCusts[key]) {
                 let c = savedCusts[key];
