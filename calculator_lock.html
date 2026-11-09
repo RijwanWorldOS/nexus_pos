@@ -489,7 +489,7 @@ function saveShopJSON(baseKey, data) {
 
         function checkPermanentCustomerByPhone(phoneQuery) {
             if (!phoneQuery || phoneQuery.length < 4) return;
-            let savedCusts = JSON.parse(localStorage.getItem('rizwan_permanent_customers') || '{}');
+           let savedCusts = loadShopJSON('rizwan_permanent_customers', {}); 
             for (let k in savedCusts) {
                 if (savedCusts[k].phone === phoneQuery.trim()) {
                     let nameInput = document.getElementById('custName');
