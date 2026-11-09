@@ -56,7 +56,7 @@
 
         .card-selection-container { display: flex; flex-direction: column; gap: 3px; flex: none; overflow: visible; }
         .section-title { font-size: 8.5px; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; display: flex; justify-content: space-between; }
-        .cards-scroll-box { flex: 1; overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding-right: 2px; }
+        .cards-scroll-box { flex: none; max-height: none; overflow: visible; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding-right: 2px; }
         
         .selectable-card { background: #040d21; border: 1.5px solid rgba(255,255,255,0.1); border-radius: 5px; padding: 5px 2px; text-align: center; cursor: pointer; position: relative; transition: 0.2s; }
         .selectable-card:hover { border-color: var(--accent-cyan); }
