@@ -381,7 +381,12 @@ function initializeBusinessContext() {
     activeSectorId = match ? match[0].toUpperCase() : '';
     activeShopId = String(activeBusiness.cryptoNodeId || '').trim()
         || 'unregistered-shop';
+// इस दुकान का अपना Trees Saved काउंटर लोड करें
+    treesSaved = Number(loadShopJSON('rizwan_trees_saved', 14));
 
+    if (!Number.isFinite(treesSaved) || treesSaved < 0) {
+        treesSaved = 14;
+    }
     currentSector = activeSectorId || '';
 
     filterCatalogTabsForBusiness();
