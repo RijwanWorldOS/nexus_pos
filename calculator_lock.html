@@ -986,11 +986,20 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
             let storeName = savedBizData.businessName || "रिज़वान ग्लोबल स्टोर";
             let storeLogo = savedBizData.brandLogoStyle || "⚡ [ELECTRIC BODYGUARD HUB] ⚡";
 
-            let billData = {
-                id: 'INV-' + Math.floor(1000 + Math.random() * 9000),
-                customer: cName, phone: cPhone, photo: customerPhotoBase64, business: storeName,
+        let billData = {
+                id: 'INV-' + Date.now(),
+                shopId: activeShopId,
+                customer: cName,
+                phone: cPhone,
+                photo: customerPhotoBase64,
+                business: storeName,
                 businessHeader: storeLogo,
-                items: [...billItems], total: grandTotal, taxRate: currentTaxRate, date: new Date().toLocaleString(), isCredit, dueDate: dueDateStr
+                items: [...billItems],
+                total: grandTotal,
+                taxRate: currentTaxRate,
+                date: new Date().toLocaleString(),
+                isCredit: isCredit,
+                dueDate: dueDateStr
             };
 
             // परमानेंट कस्टमर ऑटो-सेव डेटाबेस
