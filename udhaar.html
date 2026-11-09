@@ -372,35 +372,34 @@ button{
 
 <script>
 "use strict";
-// दुकान के हिसाब से नाइट क्लोजिंग ऑडिट
-        function triggerNightClosingAudit() {
-            let savedBills = loadShopJSON('rizwan_pos_bills', []);
+const UDHAAR_KEY = "nexus_udhaar_test_v1";
+const PURCHASE_KEY = "nexus_purchase_test_v1";
+const POS_BILLS_KEY = "rizwan_pos_bills";
 
-            let totalRevenue = savedBills.reduce(
-                (sum, bill) => sum + (Number(bill.total) || 0),
-                0
-            );
+function getActiveShopId(){
+  try {
+    const business = JSON.parse(
+      localStorage.getItem("rizwan_global_business_dna") || "{}"
+    );
+    return String(business.cryptoNodeId || "").trim() || "unregistered-shop";
+  } catch(error) {
+    console.error("Business DNA read error:", error);
+    return "unregistered-shop";
+  }
+}
 
-            let totalBillsCount = savedBills.length;
+function shopStorageKey(baseKey){
+  return baseKey + "_" + encodeURIComponent(getActiveShopId());
+}
 
-            let closingMsg = `मालिक! इस दुकान में कुल ${totalBillsCount} बिल सेव हैं और उनकी कुल बिक्री ${totalRevenue} रुपये है। शुभ रात्रि!`;
+function readShopStorage(baseKey, fallback){
+  return readStorage(shopStorageKey(baseKey), fallback);
+}
 
-            alert(
-                `📊 [ NIGHT CLOSING AUDIT - ASAD AI ]\n\n` +
-                `कुल सेव बिल: ${totalBillsCount}\n` +
-                `कुल बिक्री: ₹${totalRevenue}\n\n` +
-                `डेटा इस डिवाइस के दुकान-विशिष्ट लोकल स्टोरेज में सेव है।`
-            );
-
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-
-                let voiceSummary = new SpeechSynthesisUtterance(closingMsg);
-                voiceSummary.lang = 'hi-IN';
-
-                window.speechSynthesis.speak(voiceSummary);
-            }
-        }
+function saveShopStorage(baseKey, value){
+  return saveStorage(shopStorageKey(baseKey), value);
+}
+            
 
 let entries = [];
 let purchases = [];
