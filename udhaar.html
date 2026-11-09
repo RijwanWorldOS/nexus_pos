@@ -492,30 +492,8 @@ function loadData(){
   renderAll();
 }
 
-function loadData(){
-  const savedEntries = readStorage(UDHAAR_KEY,[]);
-  const savedPurchases = readStorage(PURCHASE_KEY,[]);
 
-  entries = Array.isArray(savedEntries) ? savedEntries : [];
-  purchases = Array.isArray(savedPurchases) ? savedPurchases : [];
-
-  entries = entries.filter(entry =>
-    entry &&
-    typeof entry === "object" &&
-    ["customer_credit","customer_collection","supplier_payment"].includes(entry.type) &&
-    cleanName(entry.name) &&
-    Number.isFinite(Number(entry.amount)) &&
-    Number(entry.amount) > 0
-  );
-
-  purchases = purchases.filter(purchase =>
-    purchase && typeof purchase === "object"
-  );
-
-  calculateBalances();
-  updateSuggestions();
-  renderAll();
-}
+  
 
 function calculateBalances(){
   const customerMap = new Map();
