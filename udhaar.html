@@ -372,9 +372,35 @@ button{
 
 <script>
 "use strict";
+// दुकान के हिसाब से नाइट क्लोजिंग ऑडिट
+        function triggerNightClosingAudit() {
+            let savedBills = loadShopJSON('rizwan_pos_bills', []);
 
-const UDHAAR_KEY = "nexus_udhaar_test_v1";
-const PURCHASE_KEY = "nexus_purchase_test_v1";
+            let totalRevenue = savedBills.reduce(
+                (sum, bill) => sum + (Number(bill.total) || 0),
+                0
+            );
+
+            let totalBillsCount = savedBills.length;
+
+            let closingMsg = `मालिक! इस दुकान में कुल ${totalBillsCount} बिल सेव हैं और उनकी कुल बिक्री ${totalRevenue} रुपये है। शुभ रात्रि!`;
+
+            alert(
+                `📊 [ NIGHT CLOSING AUDIT - ASAD AI ]\n\n` +
+                `कुल सेव बिल: ${totalBillsCount}\n` +
+                `कुल बिक्री: ₹${totalRevenue}\n\n` +
+                `डेटा इस डिवाइस के दुकान-विशिष्ट लोकल स्टोरेज में सेव है।`
+            );
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+
+                let voiceSummary = new SpeechSynthesisUtterance(closingMsg);
+                voiceSummary.lang = 'hi-IN';
+
+                window.speechSynthesis.speak(voiceSummary);
+            }
+        }
 
 let entries = [];
 let purchases = [];
