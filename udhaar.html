@@ -441,29 +441,55 @@ function readStorage(key,fallback){
   }
 }
 
-function saveStorage(key,value){
-  try{
-    localStorage.setItem(key,JSON.stringify(value));
-    return true;
-  }catch(error){
-    console.error("Storage save error:",error);
-    return false;
-  }
-}
+function loadData(){
+  const savedEntries = readShopStorage(UDHAAR_KEY, []);
+  const savedPurchases = readStorage(PURCHASE_KEY, []);
+  const posBills = readShopStorage(POS_BILLS_KEY, []);
 
-function showStatus(id,message,type){
-  const element = $(id);
-  element.textContent = message;
-  element.className = "status " + type;
-}
+  entries = Array.isArray(savedEntries) ? savedEntries : [];
+  purchases = Array.isArray(savedPurchases) ? savedPurchases : [];
 
-function getPurchaseSupplier(purchase){
-  return cleanName(purchase.supplier || purchase.supplierName || "");
-}
+  const existingIds = new Set(
+    entries.map(entry => String(entry.id || ""))
+  );
 
-function getPurchaseDue(purchase){
-  const due = Number(purchase.due);
-  return Number.isFinite(due) && due > 0 ? due : 0;
+  const posCreditEntries = posBills
+    .filter(bill =>
+      bill &&
+      bill.isCredit === true &&
+      cleanName(bill.customer) &&
+      Number(bill.total) > 0 &&
+      !existingIds.has("POS-" + String(bill.id || ""))
+    )
+    .map(bill => ({
+      id: "POS-" + String(bill.id),
+      type: "customer_credit",
+      name: cleanName(bill.customer),
+      phone: String(bill.phone || ""),
+      amount: Number(bill.total),
+      date: bill.date || todayLocal(),
+      note: "बिलिंग का उधार बिल " + String(bill.id || ""),
+      createdAt: bill.date || new Date().toISOString()
+    }));
+
+  entries = entries.concat(posCreditEntries);
+
+  entries = entries.filter(entry =>
+    entry &&
+    typeof entry === "object" &&
+    ["customer_credit","customer_collection","supplier_payment"].includes(entry.type) &&
+    cleanName(entry.name) &&
+    Number.isFinite(Number(entry.amount)) &&
+    Number(entry.amount) > 0
+  );
+
+  purchases = purchases.filter(purchase =>
+    purchase && typeof purchase === "object"
+  );
+
+  calculateBalances();
+  updateSuggestions();
+  renderAll();
 }
 
 function loadData(){
