@@ -561,7 +561,108 @@
             let txt = msgs[lang] || "Language changed.";
             speakAsad(txt);
         }
+  // भारतीय PIN कोड से पोस्ट ऑफिस और पता खोजें
+        let pincodeLookupSequence = 0;
 
+        async function handlePincodeInput(value) {
+            const pinCode = String(value).replace(/\D/g, "").slice(0, 6);
+
+            const postOfficeSelect = document.getElementById("setupPostOffice");
+            const districtInput = document.getElementById("setupDistrict");
+            const stateInput = document.getElementById("setupState");
+            const countryInput = document.getElementById("setupCountry");
+            const status = document.getElementById("pincodeLookupStatus");
+
+            const currentRequest = ++pincodeLookupSequence;
+
+            postOfficeSelect.innerHTML = '<option value="">पहले PIN कोड भरें</option>';
+            postOfficeSelect.disabled = true;
+            districtInput.value = "";
+            stateInput.value = "";
+            districtInput.readOnly = true;
+            stateInput.readOnly = true;
+            countryInput.value = "India";
+
+            if (pinCode.length !== 6 || !/^[1-9][0-9]{5}$/.test(pinCode)) {
+                status.innerText = "कृपया 6 अंकों का सही भारतीय PIN कोड भरें।";
+                return;
+            }
+
+            status.innerText = "PIN कोड से पोस्ट ऑफिस खोजा जा रहा है...";
+
+            try {
+                const response = await fetch(
+                    "https://api.postalpincode.in/pincode/" + pinCode
+                );
+
+                if (!response.ok) {
+                    throw new Error("PIN lookup network error");
+                }
+
+                const result = await response.json();
+
+                if (currentRequest !== pincodeLookupSequence) return;
+
+                if (
+                    !Array.isArray(result) ||
+                    result[0].Status !== "Success" ||
+                    !Array.isArray(result[0].PostOffice) ||
+                    result[0].PostOffice.length === 0
+                ) {
+                    throw new Error("PIN code not found");
+                }
+
+                postOfficeSelect.innerHTML = "";
+
+                result[0].PostOffice.forEach(function (office) {
+                    const option = document.createElement("option");
+
+                    option.value = office.Name || "";
+                    option.textContent = office.Name || "Unknown Post Office";
+                    option.dataset.district = office.District || "";
+                    option.dataset.state = office.State || "";
+                    option.dataset.country = office.Country || "India";
+
+                    postOfficeSelect.appendChild(option);
+                });
+
+                postOfficeSelect.disabled = false;
+                selectPostOffice();
+
+                status.innerText =
+                    "PIN कोड मिल गया। पोस्ट ऑफिस चुनकर पता जाँच लें।";
+
+            } catch (error) {
+                if (currentRequest !== pincodeLookupSequence) return;
+
+                postOfficeSelect.innerHTML =
+                    '<option value="">पोस्ट ऑफिस उपलब्ध नहीं</option>';
+
+                postOfficeSelect.disabled = true;
+                districtInput.readOnly = false;
+                stateInput.readOnly = false;
+
+                status.innerText =
+                    "PIN खोज नहीं हो सकी। इंटरनेट जाँचें और जिला व राज्य खुद भरें।";
+            }
+        }
+
+        function selectPostOffice() {
+            const postOfficeSelect = document.getElementById("setupPostOffice");
+            const selectedOption =
+                postOfficeSelect.options[postOfficeSelect.selectedIndex];
+
+            if (!selectedOption || !selectedOption.dataset.district) return;
+
+            document.getElementById("setupDistrict").value =
+                selectedOption.dataset.district;
+
+            document.getElementById("setupState").value =
+                selectedOption.dataset.state;
+
+            document.getElementById("setupCountry").value =
+                selectedOption.dataset.country || "India";
+        }
         function saveGlobalBusinessSetup() {
     const bizName = document.getElementById('setupBizName').value.trim();
     const pinCode = document.getElementById('setupPinCode').value.trim();
