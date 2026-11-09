@@ -171,6 +171,41 @@
                     </select>
                 </div>
             </div>
+            <!-- दुकान का पूरा डाक पता -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🏠 दुकान का पता / गली / मकान नंबर:</label>
+                    <input type="text" id="setupAddressLine" placeholder="मकान नंबर, गली, मार्केट, लैंडमार्क">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>📮 पोस्ट ऑफिस:</label>
+                    <select id="setupPostOffice" disabled>
+                        <option value="">पहले PIN कोड भरें</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🏙️ जिला:</label>
+                    <input type="text" id="setupDistrict" readonly placeholder="PIN से आएगा">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>🗺️ राज्य:</label>
+                    <input type="text" id="setupState" readonly placeholder="PIN से आएगा">
+                </div>
+                <div class="form-group">
+                    <label>🌐 देश:</label>
+                    <input type="text" id="setupCountry" value="India" readonly>
+                </div>
+            </div>
+
+            <div id="pincodeLookupStatus" style="font-size:9px;color:var(--accent-gold);">
+                PIN कोड भरने पर डाक पता खोजा जाएगा।
+            </div>
             <!-- मैप रडार और पिन लोकेशन लिंकिंग बॉक्स -->
             <div class="map-location-box">
                 <div>
