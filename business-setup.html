@@ -645,6 +645,14 @@ if (!uniqueCryptoNodeId) {
         taxProfile: taxProfile,
         businessModel: businessModel,
         businessScale: businessScale,
+
+        // दुकान का पूरा डाक पता
+        addressLine: document.getElementById('setupAddressLine').value.trim(),
+        postOffice: document.getElementById('setupPostOffice').value.trim(),
+        district: document.getElementById('setupDistrict').value.trim(),
+        state: document.getElementById('setupState').value.trim(),
+        country: document.getElementById('setupCountry').value.trim(),
+
         gpsLocation: gpsData || "",
         biometricStatus: "not_implemented",
         status: "saved_locally",
