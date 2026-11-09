@@ -803,11 +803,230 @@ if (!uniqueCryptoNodeId) {
     }
 }
 
+       // सेव की हुई Business DNA को दोबारा फॉर्म में लोड करें
+        function setSavedField(id, value) {
+            const element = document.getElementById(id);
+
+            if (!element || value === undefined || value === null) {
+                return;
+            }
+
+            element.value = String(value);
+        }
+
+        function setSavedSelect(id, value) {
+            const element = document.getElementById(id);
+
+            if (!element || value === undefined || value === null) {
+                return;
+            }
+
+            const savedValue = String(value);
+
+            const optionExists = Array.from(element.options).some(
+                option => option.value === savedValue
+            );
+
+            if (optionExists) {
+                element.value = savedValue;
+            }
+        }
+
+        async function loadGlobalBusinessSetup() {
+            try {
+                // पहले दिखाई दे रहे डिफॉल्ट लोगो को hidden input से मिलाएँ
+                const defaultLogo = document.querySelector(
+                    '.logo-chip.selected'
+                );
+
+                if (defaultLogo) {
+                    setSavedField(
+                        'selectedLogoStyle',
+                        defaultLogo.textContent.trim()
+                    );
+                }
+
+                const storedData = localStorage.getItem(
+                    'rizwan_global_business_dna'
+                );
+
+                // पहली बार पेज खोलने पर कोई पुराना डेटा नहीं होगा
+                if (!storedData) {
+                    return;
+                }
+
+                const saved = JSON.parse(storedData);
+
+                if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
+                    throw new Error('Saved Business DNA format is invalid');
+                }
+
+                // सामान्य फॉर्म जानकारी वापस भरें
+                setSavedField('setupOwnerName', saved.owner);
+                setSavedField('setupPhone', saved.phone);
+                setSavedField('setupEmail', saved.email);
+                setSavedField('setupBizName', saved.businessName);
+                setSavedField('setupAddressLine', saved.addressLine);
+
+                // Select वाले विकल्प वापस चुनें
+                setSavedSelect('setupTaxSelect', saved.taxProfile);
+                setSavedSelect('businessModel', saved.businessModel);
+                setSavedSelect('businessScale', saved.businessScale);
+
+                // GPS लोकेशन वापस दिखाएँ
+                setSavedField('gpsCoordsInput', saved.gpsLocation || '');
+
+                const gpsText = document.getElementById('mapCoordsText');
+
+                if (gpsText) {
+                    gpsText.innerText = saved.gpsLocation
+                        ? 'GPS: ' + saved.gpsLocation
+                        : 'GPS Coordinates: Not Locked';
+                }
+
+                // सेक्टर कार्ड का पुराना चयन वापस दिखाएँ
+                if (saved.sector) {
+                    const sectorIndex = allGlobalSectors.findIndex(
+                        sector =>
+                            sector.id + '. ' + sector.key === saved.sector
+                    );
+
+                    const sectorCards = document.querySelectorAll(
+                        '.selectable-card'
+                    );
+
+                    if (sectorIndex !== -1 && sectorCards[sectorIndex]) {
+                        document.querySelectorAll('.selectable-card')
+                            .forEach(card => card.classList.remove('active'));
+
+                        sectorCards[sectorIndex].classList.add('active');
+
+                        setSavedField(
+                            'selectedSectorInput',
+                            saved.sector
+                        );
+                    }
+                }
+
+                // लोगो का पुराना चयन वापस दिखाएँ
+                if (saved.brandLogoStyle) {
+                    const logoChips = document.querySelectorAll('.logo-chip');
+
+                    let matchingLogo = null;
+
+                    logoChips.forEach(chip => {
+                        chip.classList.remove('selected');
+
+                        if (
+                            chip.textContent.trim() ===
+                            String(saved.brandLogoStyle).trim()
+                        ) {
+                            matchingLogo = chip;
+                        }
+                    });
+
+                    if (matchingLogo) {
+                        matchingLogo.classList.add('selected');
+
+                        setSavedField(
+                            'selectedLogoStyle',
+                            saved.brandLogoStyle
+                        );
+                    }
+                }
+
+                // PIN कोड और पोस्ट ऑफिस दोबारा प्राप्त करें
+                const savedPin = String(saved.pinCode || '')
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
+
+                setSavedField('setupPinCode', savedPin);
+
+                if (/^[1-9][0-9]{5}$/.test(savedPin)) {
+                    await handlePincodeInput(savedPin);
+
+                    const postOfficeSelect =
+                        document.getElementById('setupPostOffice');
+
+                    // पहले से सेव पोस्ट ऑफिस को सूची में खोजें
+                    if (
+                        postOfficeSelect &&
+                        !postOfficeSelect.disabled &&
+                        saved.postOffice
+                    ) {
+                        const matchingOffice = Array.from(
+                            postOfficeSelect.options
+                        ).find(
+                            option => option.value === saved.postOffice
+                        );
+
+                        if (matchingOffice) {
+                            postOfficeSelect.value = matchingOffice.value;
+                            selectPostOffice();
+                        }
+                    }
+                }
+
+                // यदि PIN lookup असफल हुआ या पुराना डेटा मैनुअल था,
+                // तो सेव किया हुआ जिला और राज्य वापस भरें
+                const postOfficeSelect =
+                    document.getElementById('setupPostOffice');
+
+                if (!postOfficeSelect || postOfficeSelect.disabled) {
+                    setSavedField('setupDistrict', saved.district);
+                    setSavedField('setupState', saved.state);
+
+                    document.getElementById('setupDistrict').readOnly = false;
+                    document.getElementById('setupState').readOnly = false;
+                }
+
+                setSavedField(
+                    'setupCountry',
+                    saved.country || 'India'
+                );
+
+                const status = document.getElementById(
+                    'pincodeLookupStatus'
+                );
+
+                if (status) {
+                    status.innerText =
+                        'सेव की हुई दुकान की जानकारी वापस लोड हो गई है।';
+                }
+
+                // बायोमेट्रिक को नकली Verified नहीं दिखाना है
+                setSavedField('biometricVerified', 'false');
+
+                console.log(
+                    'Business DNA successfully restored:',
+                    saved.cryptoNodeId || 'Existing local setup'
+                );
+
+            } catch (error) {
+                console.error(
+                    'Business setup restore error:',
+                    error
+                );
+
+                const status = document.getElementById(
+                    'pincodeLookupStatus'
+                );
+
+                if (status) {
+                    status.innerText =
+                        'पुरानी जानकारी लोड नहीं हो सकी। कृपया डेटा जाँचें।';
+                }
+            }
+        }
+
         window.onload = function() {
             renderSectorCards();
             renderLogoOptions();
+
+            loadGlobalBusinessSetup();
+
             setTimeout(speakAsadWelcome, 800);
-        };
+        }; 
     </script>
 </body>
 </html>
