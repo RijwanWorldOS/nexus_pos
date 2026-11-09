@@ -426,7 +426,9 @@
                 } else if (command.includes("पिन") || command.includes("कोड")) {
                     const numbers = command.match(/\d+/);
                     if (numbers) {
-                        document.getElementById('setupPinCode').value = numbers[0];
+                        const pinInput = document.getElementById('setupPinCode');
+                          pinInput.value = numbers[0].replace(/\D/g, "").slice(0, 6);
+                      handlePincodeInput(pinInput.value);
                     }
 
                 } else if (command.includes("मोबाइल") || command.includes("फोन")) {
