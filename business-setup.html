@@ -863,16 +863,24 @@
                     );
                 }
 
-                const storedData = localStorage.getItem(
-                    'rizwan_global_business_dna'
-                );
+        // Business DNA से मुख्य रिकॉर्ड लोड करें
+                if (!window.BusinessDNA) {
+                    throw new Error('Business DNA Core लोड नहीं हुआ।');
+                }
 
-                // पहली बार पेज खोलने पर कोई पुराना डेटा नहीं होगा
-                if (!storedData) {
+                const saved = BusinessDNA.getLegacyView();
+
+                // पहली बार पेज खोलने पर कोई दुकान सेव नहीं होगी
+                if (!saved) {
                     return;
                 }
 
-                const saved = JSON.parse(storedData);
+                if (
+                    typeof saved !== 'object' ||
+                    Array.isArray(saved)
+                ) {
+                    throw new Error('Business DNA डेटा सही फॉर्मेट में नहीं है।');
+                }
 
                 if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
                     throw new Error('Saved Business DNA format is invalid');
