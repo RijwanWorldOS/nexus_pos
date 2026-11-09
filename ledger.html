@@ -789,7 +789,7 @@ function calculateOutstanding(){
 
     if(entry.type === "supplier_payment"){
       if(!suppliers.has(key)){
-        suppliers.set(key,{paid:0});
+        suppliers.set(key,{paid:0,purchaseDue:0});
       }
       suppliers.get(key).paid += amount;
     }
