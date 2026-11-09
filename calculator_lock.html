@@ -1002,16 +1002,27 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
                 dueDate: dueDateStr
             };
 
-            // परमानेंट कस्टमर ऑटो-सेव डेटाबेस
+            // दुकान के हिसाब से ग्राहक सेव करें
             if (cPhone !== "नंबर नहीं") {
-                let savedCusts = JSON.parse(localStorage.getItem('rizwan_permanent_customers') || "{}");
-                savedCusts[cName.trim().toLowerCase()] = { name: cName, phone: cPhone, lastVisited: billData.date };
-                localStorage.setItem('rizwan_permanent_customers', JSON.stringify(savedCusts));
+                let savedCusts = loadShopJSON('rizwan_permanent_customers', {});
+
+                savedCusts[cName.trim().toLowerCase()] = {
+                    name: cName,
+                    phone: cPhone,
+                    lastVisited: billData.date
+                };
+
+                saveShopJSON('rizwan_permanent_customers', savedCusts);
             }
 
-            let savedBills = JSON.parse(localStorage.getItem('rizwan_pos_bills') || '[]');
+            // दुकान के हिसाब से बिल सेव करें
+            let savedBills = loadShopJSON('rizwan_pos_bills', []);
+
             savedBills.unshift(billData);
-            localStorage.setItem('rizwan_pos_bills', JSON.stringify(savedBills));
+
+            if (!saveShopJSON('rizwan_pos_bills', savedBills)) {
+                return;
+            }
 
             // डायनेमिक QR कोड और P2P शेयरिंग जनरेशन
             generateDynamicBillQR(billData);
