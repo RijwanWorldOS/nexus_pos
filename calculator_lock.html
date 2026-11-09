@@ -141,15 +141,15 @@
            <span id="activeCatalogCategoryLabel" style="font-size:10px; font-weight:bold; color:var(--accent-cyan);">📂 चुनी हुई कैटेगरी का कैटलॉग</span>     
                 <button class="tool-btn" onclick="closeModalScreens()" style="color:var(--accent-red);">❌ बंद</button>
             </div>
-            <div style="display:flex; gap:2px; flex-wrap:wrap;">
-                <button class="tool-btn" onclick="switchCatalogTab('kirana')" style="flex:1; background:rgba(0,255,102,0.15); color:var(--accent-green); font-size:8px;">🌾 किराना</button>
-                <button class="tool-btn" onclick="switchCatalogTab('pharmacy')" style="flex:1; background:rgba(255,51,102,0.15); color:var(--accent-red); font-size:8px;">💊 फार्मेसी</button>
-                <button class="tool-btn" onclick="switchCatalogTab('clothing')" style="flex:1; background:rgba(241,196,15,0.15); color:var(--accent-gold); font-size:8px;">👕 कपड़े</button>
-                <button class="tool-btn" onclick="switchCatalogTab('dairy')" style="flex:1; background:rgba(0,255,102,0.15); color:var(--accent-green); font-size:8px;">🥛 डेयरी</button>
-                <button class="tool-btn" onclick="switchCatalogTab('hardware')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">🔩 हार्डवेयर</button>
-                <button class="tool-btn" onclick="switchCatalogTab('cosmetics')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">💄 कॉस्मेटिक</button>
-                <button class="tool-btn" onclick="switchCatalogTab('restaurant')" style="flex:1; background:rgba(241,196,15,0.15); color:var(--accent-gold); font-size:8px;">🍽️ रेस्टोरेंट</button>
-            </div>
+<div id="catalogCategoryTabs" style="display:flex; gap:2px; flex-wrap:wrap;">
+    <button class="tool-btn" data-sector-id="H01" onclick="switchCatalogTab('H01')" style="flex:1; background:rgba(0,255,102,0.15); color:var(--accent-green); font-size:8px;">🌾 किराना</button>
+    <button class="tool-btn" data-sector-id="H02" onclick="switchCatalogTab('H02')" style="flex:1; background:rgba(255,51,102,0.15); color:var(--accent-red); font-size:8px;">💊 फार्मेसी</button>
+    <button class="tool-btn" data-sector-id="H04" onclick="switchCatalogTab('H04')" style="flex:1; background:rgba(241,196,15,0.15); color:var(--accent-gold); font-size:8px;">👕 कपड़े</button>
+    <button class="tool-btn" data-sector-id="H21" onclick="switchCatalogTab('H21')" style="flex:1; background:rgba(0,255,102,0.15); color:var(--accent-green); font-size:8px;">🥛 डेयरी</button>
+    <button class="tool-btn" data-sector-id="H05" onclick="switchCatalogTab('H05')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">🔩 हार्डवेयर</button>
+    <button class="tool-btn" data-sector-id="H10" onclick="switchCatalogTab('H10')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">💄 कॉस्मेटिक</button>
+    <button class="tool-btn" data-sector-id="H03" onclick="switchCatalogTab('H03')" style="flex:1; background:rgba(241,196,15,0.15); color:var(--accent-gold); font-size:8px;">🍽️ रेस्टोरेंट</button>
+</div>
             <div id="catalogItemsGrid" style="flex:1; background:#040914; border:1.5px solid rgba(0,243,255,0.3); border-radius:8px; padding:6px; display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; overflow-y:auto;"></div>
         </div>
 
