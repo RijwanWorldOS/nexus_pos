@@ -1,4 +1,5 @@
-const CACHE_NAME = 'nexus-pos-v3';
+
+const CACHE_NAME = 'nexus-pos-v4';
 
 const assetsToCache = [
   './index.html',
@@ -10,51 +11,64 @@ const assetsToCache = [
   './zxing-browser.min.js'
 ];
 
-// जरूरी फाइलें इंस्टॉल के समय कैश करें
+// नई फाइलें Cache करें और नया Worker सक्रिय करें
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(assetsToCache);
-    })
-  );
-
-  self.skipWaiting();
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.addAll(assetsToCache);
+    await self.skipWaiting();
+  })());
 });
 
-// पुराने कैश हटाएँ
+// केवल पुराने Nexus POS Cache हटाएँ
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
 
-  self.clients.claim();
+    await Promise.all(
+      keys.map((key) => {
+        if (key.startsWith('nexus-pos-') && key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      })
+    );
+
+    await self.clients.claim();
+  })());
 });
 
-// पहले कैश से फाइल दें, फिर नेटवर्क से
+// पहले Network से नई फाइल लें, फिर Cache में अपडेट करें
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
+  const request = event.request;
+
+  if (request.method !== 'GET') return;
+
+  const requestUrl = new URL(request.url);
+
+  // बाहरी वेबसाइटों या API के अनुरोध में दखल न दें
+  if (requestUrl.origin !== self.location.origin) return;
+
+  event.respondWith((async () => {
+    try {
+      const networkResponse = await fetch(request);
+
+      if (networkResponse && networkResponse.ok) {
+        const cache = await caches.open(CACHE_NAME);
+        await cache.put(request, networkResponse.clone());
       }
 
-      return fetch(event.request).catch(() => {
-        const accept = event.request.headers.get('accept') || '';
+      return networkResponse;
+    } catch (error) {
+      const cachedResponse = await caches.match(request);
 
-        if (accept.includes('text/html')) {
-          return caches.match('./index.html');
-        }
+      if (cachedResponse) return cachedResponse;
 
-        return Response.error();
-      });
-    })
-  );
+      if (request.mode === 'navigate') {
+        const fallback = await caches.match('./index.html');
+        if (fallback) return fallback;
+      }
+
+      return Response.error();
+    }
+  })());
 });
