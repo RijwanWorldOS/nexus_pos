@@ -537,7 +537,8 @@
     const logoStyle = document.getElementById('selectedLogoStyle').value;
     const gpsData = document.getElementById('gpsCoordsInput').value;
     const taxProfile = document.getElementById('setupTaxSelect').value;
-
+const businessModel = document.getElementById('businessModel').value;
+    const businessScale = document.getElementById('businessScale').value;
     if (!bizName || !pinCode || !phoneInput) {
         alert("दुकान का नाम, पिनकोड और मोबाइल नंबर भरना जरूरी है।");
         return;
@@ -589,6 +590,8 @@
         owner: ownerName,
         brandLogoStyle: logoStyle,
         taxProfile: taxProfile,
+        businessModel: businessModel,
+        businessScale: businessScale,
         gpsLocation: gpsData || "",
         biometricStatus: "not_implemented",
         status: "saved_locally",
