@@ -36,6 +36,8 @@
                             name: product.name,
                             price: Number(product.salePrice),
                             barcode: product.barcode,
+                            description: product.description || "",
+                            unit: product.unit || "पीस",
                             category: "Product DNA",
                             stock: Number(product.stock)
                         }))
@@ -192,7 +194,7 @@
         window.addItem(
             String(item.name),
             1,
-            "1 Unit",
+           item.unit || "पीस", 
             "Standard",
             price,
             item.barcode ? {
