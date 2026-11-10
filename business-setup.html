@@ -795,30 +795,7 @@
 }
     
 
-        if (verifiedData.cryptoNodeId !== uniqueCryptoNodeId) {
-            throw new Error("Saved data verification failed");
-        }
-
-        alert(
-            "व्यवसाय की जानकारी इस डिवाइस के ब्राउज़र में सेव हो गई है।\n\n" +
-            "Node ID: " + uniqueCryptoNodeId + "\n\n" +
-            "ध्यान दें: यह अभी Firebase या Cloud पर सेव नहीं हुई है।"
-        );
-
-        speakAsad("आपकी दुकान की जानकारी इस डिवाइस में सफलतापूर्वक सेव हो गई है।");
-
-        setTimeout(function() {
-            window.location.href = "calculator_lock.html";
-        }, 1500);
-
-    } catch (error) {
-        console.error("Business setup save error:", error);
-        alert(
-            "जानकारी सेव नहीं हो सकी।\n" +
-            "ब्राउज़र की स्टोरेज अनुमति और उपलब्ध जगह जाँचें।"
-        );
-    }
-}
+        
 
        // सेव की हुई Business DNA को दोबारा फॉर्म में लोड करें
         function setSavedField(id, value) {
