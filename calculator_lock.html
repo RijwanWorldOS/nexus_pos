@@ -555,11 +555,12 @@ function loadProductDNA() {
 
 function saveProductDNA(database) {
     localStorage.setItem(
-       productDnaStorageKey(), 
+        productDnaStorageKey(),
         JSON.stringify(database)
     );
-   function addNewCustomCatalogItem() {
-    try {
+}
+
+function addNewCustomCatalogItem() {
         const name = document.getElementById('newItemNameInput').value.trim();
         const barcodeInput = document.getElementById('newItemBarcodeInput').value.trim();
 
