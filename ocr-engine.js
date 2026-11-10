@@ -832,17 +832,18 @@ const firstUsefulLine = text
         documentType: documentType || "unknown",
 
         businessName:
-            /visiting-card|signboard/.test(documentType)
+         /visiting-card\|signboard/.test(normalizedDocumentType)  
                 ? firstUsefulLine
                 : "",
 
         supplierName:
-            /purchase-bill|supplier-receipt/.test(documentType)
+          /purchase-bill\|supplier-receipt/.test(normalizedDocumentType)  
                 ? firstUsefulLine
                 : "",
 
         productName:
-            documentType === "product-package"
+            normalizedDocumentType === "product-package"
+
                 ? firstUsefulLine
                 : "",
 
