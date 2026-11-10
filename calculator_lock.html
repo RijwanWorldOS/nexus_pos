@@ -558,6 +558,96 @@ function saveProductDNA(database) {
        productDnaStorageKey(), 
         JSON.stringify(database)
     );
+   function addNewCustomCatalogItem() {
+    try {
+        const name = document.getElementById('newItemNameInput').value.trim();
+        const barcodeInput = document.getElementById('newItemBarcodeInput').value.trim();
+
+        const costRaw = document.getElementById('newItemCostInput').value;
+        const priceRaw = document.getElementById('newItemPriceInput').value;
+        const stockRaw = document.getElementById('newItemStockInput').value;
+
+        const unit = document.getElementById('newItemUnitInput').value.trim();
+
+        const costPrice = Number(costRaw);
+        const salePrice = Number(priceRaw);
+        const stock = Number(stockRaw);
+
+        if (!activeShopId || !activeSectorId ||
+            !supportedSectorIds[activeSectorId]) {
+            alert("पहले सही Business Setup और कैटेगरी चुनें।");
+            return;
+        }
+
+        if (!name || !unit ||
+            costRaw === '' || priceRaw === '' || stockRaw === '' ||
+            !Number.isFinite(costPrice) || costPrice < 0 ||
+            !Number.isFinite(salePrice) || salePrice <= 0 ||
+            !Number.isFinite(stock) || stock < 0) {
+            alert("सामान का नाम, खरीद मूल्य, बिक्री मूल्य, स्टॉक और यूनिट सही भरें।");
+            return;
+        }
+
+        const database = loadProductDNA();
+
+        let barcode = barcodeInput;
+
+        if (!barcode) {
+            do {
+                barcode = "MANUAL-" + Date.now() + "-" +
+                    Math.floor(Math.random() * 1000000);
+            } while (Object.prototype.hasOwnProperty.call(database, barcode));
+        }
+
+        if (Object.prototype.hasOwnProperty.call(database, barcode)) {
+            alert("यह बारकोड या प्रोडक्ट ID पहले से मौजूद है।");
+            return;
+        }
+
+        const now = new Date().toISOString();
+
+        database[barcode] = {
+            barcode: barcode,
+            name: name,
+            description: "",
+            costPrice: costPrice,
+            salePrice: salePrice,
+            stock: stock,
+            unit: unit,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        saveProductDNA(database);
+
+        const savedDatabase = loadProductDNA();
+
+        if (!savedDatabase[barcode] ||
+            savedDatabase[barcode].name !== name) {
+            throw new Error("Product DNA में सेव होने की पुष्टि नहीं हुई।");
+        }
+
+        document.getElementById('newItemNameInput').value = '';
+        document.getElementById('newItemBarcodeInput').value = '';
+        document.getElementById('newItemCostInput').value = '';
+        document.getElementById('newItemPriceInput').value = '';
+        document.getElementById('newItemStockInput').value = '';
+        document.getElementById('newItemUnitInput').value = '';
+
+        const catalogGrid = document.getElementById('catalogItemsGrid');
+
+        if (catalogGrid) {
+            loadCatalogGridForManager(activeSectorId);
+        }
+
+        alert("सामान सफलतापूर्वक Product DNA कैटलॉग में सेव हो गया।");
+        speakAiMessage(name + " कैटलॉग में सेव हो गया है।");
+
+    } catch (error) {
+        console.error("Manual Catalog Save Error:", error);
+        alert("सामान सेव नहीं हुआ: " + error.message);
+    }
+} 
 }
 function saveScannedProduct() {
     try {
