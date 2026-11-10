@@ -237,7 +237,14 @@
         <input type="hidden" id="selectedLogoStyle" value="⚡ [RIZWAN GLOBAL HUB] - SECURE P2P">
         <input type="hidden" id="biometricVerified" value="false">
        <input type="hidden" id="gpsCoordsInput" value=""> 
-
+<input
+    type="file"
+    id="businessOCRFile"
+    accept="image/*"
+    capture="environment"
+    style="display:none"
+    onchange="processAutoScanFile(this.files[0]); this.value='';"
+>
         <div class="bottom-nav-bar">
             <a href="index.html" class="bot-btn" onclick="speakAsadAction('Home')">
                 <span>🏠</span><span>Home</span>
@@ -257,6 +264,7 @@
         </div>
     </div>
 <script src="business-dna.js"></script>
+   <script src="ocr-engine.js"></script> 
 <script>
         const allGlobalSectors = [
             {id: 'H01', key: 'Retail Kirana', name: 'Retail Kirana', desc: 'किराना एवं जनरल'},
