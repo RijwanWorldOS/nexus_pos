@@ -793,7 +793,39 @@ function extractDocumentFields(rawText, documentType) {
 
    
 
-   const firstUsefulLine = ""; 
+   const normalizedDocumentType = String(
+    documentType || "unknown"
+).toLowerCase();
+
+const firstUsefulLine = text
+    .split("\n")
+    .map(function (line) {
+        return cleanText(line);
+    })
+    .filter(function (line) {
+        if (line.length < 3 || line.length > 80) {
+            return false;
+        }
+
+        if (/@|https?:\/\/|www\./i.test(line)) {
+            return false;
+        }
+
+        if (/(invoice|tax invoice|bill no|receipt no|gstin|phone|mobile|email|address|date|total|subtotal|quantity|qty|mrp|price)/i.test(line)) {
+            return false;
+        }
+
+        if (/^[\d\s.,:/\-₹]+$/.test(line)) {
+            return false;
+        }
+
+        const digits = (line.match(/\d/g) || []).length;
+        if (digits > line.length * 0.4) {
+            return false;
+        }
+
+        return true;
+    })[0] || "";
 
     return {
 
