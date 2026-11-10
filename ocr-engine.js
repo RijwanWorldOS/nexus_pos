@@ -791,10 +791,10 @@ function extractDocumentFields(rawText, documentType) {
         /\b[0-9]{8,14}\b/g
     ) || [];
 
-    const lines = text
+   const lines = text
         .split("\n")
         .map(cleanText)
-        .filter(Boolean);
+        .filter(Boolean); 
 
    const firstUsefulLine = ""; 
 
@@ -1099,25 +1099,35 @@ function deleteReviewDraft(draftId) {
 ===================================================== */
 
 async function terminate() {
+async function terminate() {
 
     stopCameraScanner();
-await ocrRecognitionQueue;
+
+    if (ocrWorkerInitPromise) {
+        try {
+            await ocrWorkerInitPromise;
+        } catch (error) {
+            // Worker initialization failed.
+        }
+    }
+
+    await ocrRecognitionQueue;
+
     if (ocrWorker) {
-
         await ocrWorker.terminate();
-
         ocrWorker = null;
     }
 
     ocrWorkerPromise = null;
-ocrWorkerInitPromise = null;
-ocrRecognitionQueue = Promise.resolve();
-    barcodeReader = null;
+    ocrWorkerInitPromise = null;
+    ocrRecognitionQueue = Promise.resolve();
 
+    barcodeReader = null;
     barcodeLibraryPromise = null;
 
     return true;
 }
+    
 
 
 /* =====================================================
