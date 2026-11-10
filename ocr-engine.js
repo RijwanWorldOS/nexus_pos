@@ -48,8 +48,7 @@ const CONFIG = {
 let ocrWorker = null;
 let ocrWorkerPromise = null;
 let ocrWorkerInitPromise = null;
-
-let barcodeReader = null;
+let ocrRecognitionQueue = Promise.resolve();let barcodeReader = null;
 let barcodeLibraryPromise = null;
 
 let activeCameraControls = null;
@@ -795,7 +794,7 @@ function extractDocumentFields(rawText, documentType) {
         .map(cleanText)
         .filter(Boolean);
 
-    const firstUsefulLine = lines.find(function (line) {
+    const firstUsefulLine = "";
         return line.length >= 3 &&
             line.length <= 90;
     }) || "";
@@ -866,9 +865,17 @@ async function scanDocument(file, options) {
     const worker = await getOCRWorker(
         options.onProgress
     );
+const recognitionTask = ocrRecognitionQueue.then(function () {
+    return worker.recognize(canvas);
+});
 
-    const result = await worker.recognize(canvas);
+ocrRecognitionQueue = recognitionTask.then(
+    function () {},
+    function () {}
+);
 
+const result = await recognitionTask;
+    
     const rawText = cleanText(
         result && result.data
             ? result.data.text
@@ -1007,88 +1014,82 @@ function validatePaymentQR(rawValue) {
 /* =====================================================
    MANUAL REVIEW QUEUE
 ===================================================== */
+function readReviewQueue() {
+    try {
+        const raw = localStorage.getItem(REVIEW_STORAGE_KEY);
+        const drafts = JSON.parse(raw || "[]");
 
-const REVIEW_STORAGE_KEY =
-    "nexus_universal_scan_review_v1";
+        if (!Array.isArray(drafts)) {
+            throw new Error("Review Queue का डेटा खराब है।");
+        }
+
+        return drafts;
+
+    } catch (error) {
+        throw new Error(
+            "Review Queue पढ़ने में समस्या: " + error.message
+        );
+    }
+}
 
 
 function saveReviewDraft(scanResult) {
 
     if (!scanResult || !scanResult.reviewRequired) {
-
-        throw new Error(
-            "अमान्य Scan Result।"
-        );
+        throw new Error("अमान्य Scan Result।");
     }
 
-    const existing = JSON.parse(
-        localStorage.getItem(REVIEW_STORAGE_KEY) || "[]"
-    );
-
-    if (!Array.isArray(existing)) {
-
-        throw new Error(
-            "Review Queue का डेटा खराब है। पहले बैकअप लें।"
-        );
-    }
+    const existing = readReviewQueue();
 
     const draft = {
-
-        id:
-            "SCAN-" +
-            Date.now() +
-            "-" +
+        id: "SCAN-" + Date.now() + "-" +
             Math.random().toString(36).slice(2, 8),
 
         status: "pending_review",
-
         result: scanResult,
-
         createdAt: new Date().toISOString()
     };
 
     existing.push(draft);
 
-    localStorage.setItem(
-        REVIEW_STORAGE_KEY,
-        JSON.stringify(existing)
-    );
+    try {
+        localStorage.setItem(
+            REVIEW_STORAGE_KEY,
+            JSON.stringify(existing)
+        );
+    } catch (error) {
+        throw new Error(
+            "Review Queue सेव नहीं हुई: " + error.message
+        );
+    }
 
     return draft;
 }
 
 
 function getReviewDrafts() {
-
-    try {
-
-        const drafts = JSON.parse(
-            localStorage.getItem(REVIEW_STORAGE_KEY) || "[]"
-        );
-
-        return Array.isArray(drafts)
-            ? drafts
-            : [];
-
-    } catch (error) {
-
-        return [];
-    }
+    return readReviewQueue();
 }
 
 
 function deleteReviewDraft(draftId) {
 
-    const drafts = getReviewDrafts();
+    const drafts = readReviewQueue();
 
     const updated = drafts.filter(function (draft) {
         return draft.id !== draftId;
     });
 
-    localStorage.setItem(
-        REVIEW_STORAGE_KEY,
-        JSON.stringify(updated)
-    );
+    try {
+        localStorage.setItem(
+            REVIEW_STORAGE_KEY,
+            JSON.stringify(updated)
+        );
+    } catch (error) {
+        throw new Error(
+            "Review Queue अपडेट नहीं हुई: " + error.message
+        );
+    }
 
     return updated.length;
 }
