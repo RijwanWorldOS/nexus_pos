@@ -577,10 +577,18 @@ async function processAutoScanFile(file) {
 
         const result = await window.NexusUniversalScan.scanDocument(file, {
             documentType: "visiting-card",
-            onProgress: function (message, progress) {
-                statusBox.innerText =
-                    "🔍 OCR: " + message + " (" + progress + "%)";
-            }
+            onProgress: function (progressInfo) {
+    const message = progressInfo && progressInfo.status
+        ? progressInfo.status
+        : "स्कैन जारी है";
+
+    const progress = progressInfo && Number.isFinite(progressInfo.progress)
+        ? Math.round(progressInfo.progress)
+        : 0;
+
+    statusBox.innerText =
+        "🔍 OCR: " + message + " (" + progress + "%)";
+}
         });
 
         const fields = result.fields || {};
