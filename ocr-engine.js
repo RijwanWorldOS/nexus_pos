@@ -54,7 +54,7 @@ let barcodeReader = null;
 let barcodeLibraryPromise = null;
 
 let activeCameraControls = null;
-
+const REVIEW_STORAGE_KEY = "nexus_universal_scan_review_v1";
 
 /* =====================================================
    COMMON UTILITIES
@@ -791,10 +791,7 @@ function extractDocumentFields(rawText, documentType) {
         /\b[0-9]{8,14}\b/g
     ) || [];
 
-   const lines = text
-        .split("\n")
-        .map(cleanText)
-        .filter(Boolean); 
+   
 
    const firstUsefulLine = ""; 
 
