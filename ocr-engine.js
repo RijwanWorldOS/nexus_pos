@@ -1099,7 +1099,6 @@ function deleteReviewDraft(draftId) {
 ===================================================== */
 
 async function terminate() {
-async function terminate() {
 
     stopCameraScanner();
 
