@@ -550,17 +550,102 @@
     speakAsad(message);
 } 
 
-        function triggerAutoScan() {
-    const message =
-        "कैमरा आधारित OCR स्कैन सुविधा अभी जुड़ी नहीं है। " +
-        "आपकी दुकान की जानकारी अपने आप नहीं भरी गई है। " +
-        "कृपया जानकारी फॉर्म में दर्ज करें।";
+        async function triggerAutoScan() {
+    const fileInput = document.getElementById('businessOCRFile');
 
-    document.getElementById('aiDynamicWelcomeText').innerText =
-        "💬 " + message;
+    if (!window.NexusUniversalScan ||
+        typeof window.NexusUniversalScan.scanDocument !== 'function') {
+        alert("OCR इंजन लोड नहीं हुआ। ocr-engine.js का लिंक चेक करें।");
+        return;
+    }
 
-    alert(message);
-    speakAsad(message);
+    fileInput.click();
+}
+
+async function processAutoScanFile(file) {
+    if (!file) return;
+
+    if (!file.type || !file.type.startsWith('image/')) {
+        alert("कृपया JPG, PNG या दूसरी इमेज फाइल चुनें।");
+        return;
+    }
+
+    const statusBox = document.getElementById('aiDynamicWelcomeText');
+
+    try {
+        statusBox.innerText = "📷 फोटो पढ़ी जा रही है... कृपया प्रतीक्षा करें।";
+
+        const result = await window.NexusUniversalScan.scanDocument(file, {
+            documentType: "visiting-card",
+            onProgress: function (message, progress) {
+                statusBox.innerText =
+                    "🔍 OCR: " + message + " (" + progress + "%)";
+            }
+        });
+
+        const fields = result.fields || {};
+
+        const reviewText =
+            "OCR से यह जानकारी मिली है:\n\n" +
+            result.rawText +
+            "\n\nक्या आप इस जानकारी को फॉर्म में भरने के लिए आगे बढ़ना चाहते हैं?";
+
+        if (!confirm(reviewText)) {
+            statusBox.innerText = "💬 स्कैन रद्द किया गया। फॉर्म में कोई बदलाव नहीं हुआ।";
+            return;
+        }
+
+        if (fields.businessName) {
+            const name = prompt(
+                "दुकान / ब्रांड का नाम जाँचें:",
+                fields.businessName
+            );
+
+            if (name !== null) {
+                document.getElementById('setupBizName').value = name.trim();
+            }
+        }
+
+        if (fields.phone) {
+            const phone = prompt("मोबाइल नंबर जाँचें:", fields.phone);
+
+            if (phone !== null) {
+                document.getElementById('setupPhone').value = phone.trim();
+            }
+        }
+
+        if (fields.email) {
+            const email = prompt("ईमेल आईडी जाँचें:", fields.email);
+
+            if (email !== null) {
+                document.getElementById('setupEmail').value = email.trim();
+            }
+        }
+
+        if (fields.pinCode) {
+            const pin = prompt("PIN कोड जाँचें:", fields.pinCode);
+
+            if (pin !== null && /^[1-9][0-9]{5}$/.test(pin.trim())) {
+                document.getElementById('setupPinCode').value = pin.trim();
+                handlePincodeInput(pin.trim());
+            }
+        }
+
+        statusBox.innerText =
+            "✅ OCR स्कैन पूरा हुआ। कृपया भरी गई जानकारी जाँच लें।";
+
+        speakAsad("स्कैन पूरा हुआ। कृपया जानकारी जाँच लें।");
+
+    } catch (error) {
+        console.error("Business OCR Error:", error);
+
+        statusBox.innerText = "❌ OCR स्कैन में समस्या आई।";
+
+        alert(
+            "फोटो पढ़ने में समस्या आई:\n" +
+            (error.message || "अज्ञात त्रुटि")
+        );
+    }
 }
 
         function changeAppLanguage(lang) {
