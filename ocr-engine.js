@@ -207,7 +207,7 @@ async function getOCRWorker(onProgress) {
    IMAGE PREPARATION
 ===================================================== */
 
-async function prepareImage(file) {
+async function prepareImage(file, enhanceForOCR) {
 
     validateImage(file);
 
@@ -263,36 +263,39 @@ async function prepareImage(file) {
             canvas.height
         );
 
-        const pixels = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
-        );
+ if (enhanceForOCR !== false) {
 
-        const data = pixels.data;
-
-        for (let i = 0; i < data.length; i += 4) {
-
-            const gray =
-                data[i] * 0.299 +
-                data[i + 1] * 0.587 +
-                data[i + 2] * 0.114;
-
-            const enhanced = Math.max(
+            const pixels = context.getImageData(
                 0,
-                Math.min(
-                    255,
-                    (gray - 128) * 1.15 + 128
-                )
+                0,
+                canvas.width,
+                canvas.height
             );
 
-            data[i] = enhanced;
-            data[i + 1] = enhanced;
-            data[i + 2] = enhanced;
-        }
+            const data = pixels.data;
 
-        context.putImageData(pixels, 0, 0);
+            for (let i = 0; i < data.length; i += 4) {
+
+                const gray =
+                    data[i] * 0.299 +
+                    data[i + 1] * 0.587 +
+                    data[i + 2] * 0.114;
+
+                const enhanced = Math.max(
+                    0,
+                    Math.min(
+                        255,
+                        (gray - 128) * 1.15 + 128
+                    )
+                );
+
+                data[i] = enhanced;
+                data[i + 1] = enhanced;
+                data[i + 2] = enhanced;
+            }
+
+            context.putImageData(pixels, 0, 0);
+        }       
 
         return canvas;
 
@@ -441,7 +444,8 @@ async function getBarcodeReader() {
         350
     );
 
-    return barcodeReader;
+    return barcodeReader
+}
 /* =====================================================
    BARCODE RESULT NORMALIZER
 ===================================================== */
@@ -589,7 +593,7 @@ async function scanBarcodeImage(file, options) {
 
     const reader = await getBarcodeReader();
 
-    const canvas = await prepareImage(file);
+    const canvas = await prepareImage(file, false);
 
     sendProgress(
         options.onProgress,
