@@ -48,7 +48,9 @@ const CONFIG = {
 let ocrWorker = null;
 let ocrWorkerPromise = null;
 let ocrWorkerInitPromise = null;
-let ocrRecognitionQueue = Promise.resolve();let barcodeReader = null;
+let ocrRecognitionQueue = Promise.resolve();
+
+let barcodeReader = null;
 let barcodeLibraryPromise = null;
 
 let activeCameraControls = null;
@@ -794,10 +796,7 @@ function extractDocumentFields(rawText, documentType) {
         .map(cleanText)
         .filter(Boolean);
 
-    const firstUsefulLine = "";
-        return line.length >= 3 &&
-            line.length <= 90;
-    }) || "";
+   const firstUsefulLine = ""; 
 
     return {
 
@@ -1102,7 +1101,7 @@ function deleteReviewDraft(draftId) {
 async function terminate() {
 
     stopCameraScanner();
-
+await ocrRecognitionQueue;
     if (ocrWorker) {
 
         await ocrWorker.terminate();
@@ -1111,7 +1110,8 @@ async function terminate() {
     }
 
     ocrWorkerPromise = null;
-
+ocrWorkerInitPromise = null;
+ocrRecognitionQueue = Promise.resolve();
     barcodeReader = null;
 
     barcodeLibraryPromise = null;
