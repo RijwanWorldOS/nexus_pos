@@ -47,6 +47,7 @@ const CONFIG = {
 
 let ocrWorker = null;
 let ocrWorkerPromise = null;
+let ocrWorkerInitPromise = null;
 
 let barcodeReader = null;
 let barcodeLibraryPromise = null;
@@ -178,29 +179,46 @@ async function getOCRWorker(onProgress) {
         return ocrWorker;
     }
 
-    const Tesseract = await loadOCRLibrary();
+    if (ocrWorkerInitPromise) {
+        return ocrWorkerInitPromise;
+    }
 
-    ocrWorker = await Tesseract.createWorker(
-        CONFIG.ocrLanguages,
-        1,
-        {
-            langPath: CONFIG.tessdataURL,
+    ocrWorkerInitPromise = (async function () {
 
-            logger: function (event) {
+        const Tesseract = await loadOCRLibrary();
 
-                if (event && event.status) {
-                    sendProgress(
-                        onProgress,
-                        "OCR: " + event.status,
-                        event.progress || 0
-                    );
+        const worker = await Tesseract.createWorker(
+            CONFIG.ocrLanguages,
+            1,
+            {
+                langPath: CONFIG.tessdataURL,
+
+                logger: function (event) {
+                    if (event && event.status) {
+                        sendProgress(
+                            onProgress,
+                            "OCR: " + event.status,
+                            event.progress || 0
+                        );
+                    }
                 }
             }
-        }
-    );
+        );
 
-    return ocrWorker;
+        ocrWorker = worker;
+        return worker;
+
+    })();
+
+    try {
+        return await ocrWorkerInitPromise;
+    } catch (error) {
+        ocrWorkerInitPromise = null;
+        throw error;
+    }
 }
+
+    
 
 
 /* =====================================================
