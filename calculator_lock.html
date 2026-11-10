@@ -799,26 +799,29 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
     renderLedger();
 } 
 
+function toggleContinuousVoice() {
+            if (!window.NexusVoice) {
+                alert("Nexus Voice Engine लोड नहीं हुआ।");
+                return;
+            }
 
-        function toggleContinuousVoice() {
-            let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            let btn = document.getElementById('pulsarMicBtn');
-            if (!SpeechRecognition) { alert("⚠️ वॉइस समर्थित नहीं है!"); return; }
-            try {
-                let recognition = new SpeechRecognition();
-                recognition.continuous = false;
-                recognition.lang = currentAppLang;
-                recognition.onstart = () => { if(btn) btn.style.background = "#ff3366"; speakAiMessage("सुन रहा हूँ, साफ-साफ बोलो मालिक!"); };
-                recognition.onresult = (event) => {
-                    let transcript = event.results[0][0].transcript.trim();
-                    if(transcript.length > 0) {
-                        addItem(transcript, 1, '1 Unit', 'Standard', 100);
-                        speakAiMessage(`${transcript} जोड़ दिया गया है!`);
-                    }
-                };
-                recognition.start();
-            } catch(e) {}
+            const status = window.NexusVoice.getStatus();
+
+            if (status.listening) {
+                window.NexusVoice.stopListening();
+                return;
+            }
+
+            const result = window.NexusVoice.startListening({
+                execute: true,
+                language: currentAppLang === "en-US" ? "en-IN" : "hi-IN"
+            });
+
+            if (!result.ok) {
+                alert(result.message || "माइक शुरू नहीं हो सका।");
+            }
         }
+        
    function switchCatalogTab(sector) {
             if (sector !== activeSectorId) {
                 console.warn("दूसरी कैटेगरी खोलने की अनुमति नहीं है:", sector);
