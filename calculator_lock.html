@@ -1009,16 +1009,45 @@ function toggleContinuousVoice() {
     });
 } 
 
-        function updateItem(index, type, val) {
+    function updateItem(index, type, val) {
+    if (!billItems[index]) return;
 
-        
-            if (type === 'qty') { let q = parseInt(val); if (!isNaN(q) && q > 0) { billItems[index].qty = q; billItems[index].total = q * billItems[index].unitPrice; } }
-            else if (type === 'price') { let p = parseFloat(val); if (!isNaN(p) && p >= 0) { billItems[index].unitPrice = p; billItems[index].total = billItems[index].qty * p; } }
-            else if (type === 'weight') { billItems[index].weight = val; }
-            else if (type === 'quality') { billItems[index].quality = val; }
-            else if (type === 'name') { billItems[index].name = val; }
-            renderLedger();
+    if (type === 'qty') {
+        const q = Number(val);
+
+        if (Number.isFinite(q) && q > 0) {
+            billItems[index].qty = q;
+            billItems[index].total =
+                q * billItems[index].unitPrice;
+        } else {
+            alert("मात्रा शून्य से अधिक होनी चाहिए।");
+            return;
         }
+    }
+    else if (type === 'price') {
+        const p = Number(val);
+
+        if (Number.isFinite(p) && p >= 0) {
+            billItems[index].unitPrice = p;
+            billItems[index].total =
+                billItems[index].qty * p;
+        } else {
+            alert("रेट सही दर्ज करें।");
+            return;
+        }
+    }
+    else if (type === 'weight') {
+        billItems[index].weight = val;
+    }
+    else if (type === 'quality') {
+        billItems[index].quality = val;
+    }
+    else if (type === 'name') {
+        billItems[index].name = val;
+    }
+
+    renderLedger();
+}
 
         function renderLedger() {
             let container = document.getElementById('ledgerContainer');
