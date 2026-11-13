@@ -1021,80 +1021,292 @@ function toggleContinuousVoice() {
     });
 } 
 
-    function updateItem(index, type, val) {
+    function getBillItemUnit(item) {
+    let unit = "";
+
+    try {
+        if (item.barcode && typeof loadProductDNA === "function") {
+            const db = loadProductDNA();
+            const product = db[item.barcode];
+            if (product && product.unit) unit = product.unit;
+        }
+    } catch (error) {
+        console.warn("Bill unit lookup:", error);
+    }
+
+    unit = String(unit || item.weight || "").toLowerCase();
+
+    if (/kg|किलो|किलोग्राम|किग्रा/.test(unit)) return "kg";
+    if (/ग्राम|^g$|gm/.test(unit)) return "g";
+    if (/लीटर|लिटर|^l$|ltr/.test(unit)) return "l";
+    if (/मिलीलीटर|^ml$/.test(unit)) return "ml";
+    if (/पीस|नग|piece|pcs/.test(unit)) return "piece";
+    if (/पैकेट|packet|पैक/.test(unit)) return "packet";
+    if (/बॉक्स|डिब्बा|box/.test(unit)) return "box";
+
+    return "piece";
+}
+
+function getBillQuantitySteps(item) {
+    const unit = getBillItemUnit(item);
+
+    if (unit === "kg") {
+        return [
+            [0.05, "50 ग्राम"],
+            [0.1, "100 ग्राम"],
+            [0.25, "250 ग्राम"],
+            [0.5, "500 ग्राम"],
+            [1, "1 किलो"],
+            [5, "5 किलो"],
+            [10, "10 किलो"],
+            [20, "20 किलो"],
+            [50, "50 किलो"]
+        ];
+    }
+
+    if (unit === "g") {
+        return [
+            [50, "50 ग्राम"],
+            [100, "100 ग्राम"],
+            [250, "250 ग्राम"],
+            [500, "500 ग्राम"],
+            [1000, "1 किलो"],
+            [5000, "5 किलो"],
+            [10000, "10 किलो"],
+            [20000, "20 किलो"],
+            [50000, "50 किलो"]
+        ];
+    }
+
+    if (unit === "l") {
+        return [
+            [0.05, "50 ml"],
+            [0.1, "100 ml"],
+            [0.25, "250 ml"],
+            [0.5, "500 ml"],
+            [1, "1 लीटर"],
+            [5, "5 लीटर"],
+            [10, "10 लीटर"],
+            [20, "20 लीटर"],
+            [50, "50 लीटर"]
+        ];
+    }
+
+    if (unit === "ml") {
+        return [
+            [50, "50 ml"],
+            [100, "100 ml"],
+            [250, "250 ml"],
+            [500, "500 ml"],
+            [1000, "1 लीटर"],
+            [5000, "5 लीटर"],
+            [10000, "10 लीटर"],
+            [20000, "20 लीटर"],
+            [50000, "50 लीटर"]
+        ];
+    }
+
+    return [
+        [1, "1 पीस"],
+        [2, "2 पीस"],
+        [5, "5 पीस"],
+        [10, "10 पीस"],
+        [20, "20 पीस"],
+        [50, "50 पीस"]
+    ];
+}
+
+function canSetBillItemQuantity(index, newQty) {
+    const item = billItems[index];
+    if (!item || !item.barcode) return true;
+
+    const db = loadProductDNA();
+    const product = db[item.barcode];
+
+    if (!product) return true;
+
+    const otherQty = billItems.reduce(function(sum, row, i) {
+        if (i === index || row.barcode !== item.barcode) return sum;
+        return sum + Number(row.qty || 0);
+    }, 0);
+
+    const stock = Number(product.stock);
+
+    if (!Number.isFinite(stock) || otherQty + newQty > stock + 0.000001) {
+        alert(
+            "स्टॉक पर्याप्त नहीं है। उपलब्ध स्टॉक: " +
+            Math.max(0, stock - otherQty)
+        );
+        return false;
+    }
+
+    return true;
+}
+
+function adjustItemQuantity(index, direction) {
+    const item = billItems[index];
+    if (!item) return;
+
+    const selector = document.getElementById("qtyStep_" + index);
+    const step = Number(selector ? selector.value : 0.1);
+
+    if (!Number.isFinite(step) || step <= 0) return;
+
+    const nextQty = Number(
+        (Number(item.qty) + direction * step).toFixed(6)
+    );
+
+    if (nextQty <= 0) {
+        alert("मात्रा शून्य से कम नहीं हो सकती।");
+        return;
+    }
+
+    if (!canSetBillItemQuantity(index, nextQty)) return;
+
+    item.qty = nextQty;
+    item.total = item.qty * item.unitPrice;
+
+    renderLedger();
+}
+
+function updateItem(index, type, val) {
     if (!billItems[index]) return;
 
-    if (type === 'qty') {
+    if (type === "qty") {
         const q = Number(val);
 
-        if (Number.isFinite(q) && q > 0) {
-            billItems[index].qty = q;
-            billItems[index].total =
-                q * billItems[index].unitPrice;
-        } else {
+        if (!Number.isFinite(q) || q <= 0) {
             alert("मात्रा शून्य से अधिक होनी चाहिए।");
             return;
         }
+
+        if (!canSetBillItemQuantity(index, q)) return;
+
+        billItems[index].qty = q;
+        billItems[index].total =
+            q * billItems[index].unitPrice;
     }
-    else if (type === 'price') {
+    else if (type === "price") {
         const p = Number(val);
 
-        if (Number.isFinite(p) && p >= 0) {
-            billItems[index].unitPrice = p;
-            billItems[index].total =
-                billItems[index].qty * p;
-        } else {
+        if (!Number.isFinite(p) || p < 0) {
             alert("रेट सही दर्ज करें।");
             return;
         }
+
+        billItems[index].unitPrice = p;
+        billItems[index].total =
+            billItems[index].qty * p;
     }
-    else if (type === 'weight') {
+    else if (type === "weight") {
         billItems[index].weight = val;
     }
-    else if (type === 'quality') {
+    else if (type === "quality") {
         billItems[index].quality = val;
     }
-    else if (type === 'name') {
+    else if (type === "name") {
         billItems[index].name = val;
     }
 
     renderLedger();
 }
 
-        function renderLedger() {
-            let container = document.getElementById('ledgerContainer');
-            if(!container) return;
-            container.innerHTML = "";
-            let subTotal = 0;
-            if (billItems.length === 0) {
-                container.innerHTML = `<div style="color: var(--text-muted); text-align: center; margin-top: 35px; font-size: 10px;">बिल खाली है। कैटलॉग से चुनें या बोलिए! 😊</div>`;
-                document.getElementById('grandTotalText').innerText = "₹ 0";
-                return;
-            }
-            billItems.forEach((item, index) => {
-                subTotal += item.total;
-                container.innerHTML += `
-                    <div class="ledger-row">
-                        <input type="text" value="${item.name}" onchange="updateItem(${index}, 'name', this.value)" style="background:transparent; border:none; color:var(--accent-cyan); font-weight:bold; font-size:10px; width:28%; outline:none;" title="नाम">
-                        <input type="number" value="${item.qty}" min="0.001" step="0.001" onchange="updateItem(${index}, 'qty', this.value)" style="width:26px; background:#030712; border:1px solid rgba(0,243,255,0.3); color:#fff; font-size:9.5px; text-align:center; border-radius:3px;" title="मात्रा">
-                        <input type="text" value="${item.weight}" onchange="updateItem(${index}, 'weight', this.value)" style="width:38px; background:#030712; border:1px solid rgba(0,243,255,0.3); color:#fff; font-size:9.5px; text-align:center; border-radius:3px;" title="वजन">
-                        <input type="text" value="${item.quality}" onchange="updateItem(${index}, 'quality', this.value)" style="width:38px; background:#030712; border:1px solid rgba(0,243,255,0.3); color:#fff; font-size:9.5px; text-align:center; border-radius:3px;" title="क्वालिटी">
-                        <input type="number" value="${item.unitPrice}" onchange="updateItem(${index}, 'price', this.value)" style="width:45px; background:#030712; border:1px solid var(--accent-green); color:var(--accent-green); font-size:9.5px; text-align:center; border-radius:3px;" title="रेट">
-                        <span style="font-weight:bold; color:var(--accent-green); font-size:9.5px;">₹${item.total}</span>
-                    </div>`;
-            });
-            let taxAmount = (subTotal * currentTaxRate) / 100;
-            grandTotal = subTotal + taxAmount;
-            document.getElementById('grandTotalText').innerText = `₹ ${grandTotal.toLocaleString('en-IN')} (GST/CST ${currentTaxRate}%)`;
-        }
+function renderLedger() {
+    let container = document.getElementById("ledgerContainer");
+    if (!container) return;
 
-        function clearBill() {
-            billItems = []; 
-            let cN = document.getElementById('custName'); if(cN) cN.value="";
-            let cP = document.getElementById('custPhone'); if(cP) cP.value="";
-            renderLedger();
-            speakAiMessage("बिल साफ कर दिया गया है!");
-        }
+    container.innerHTML = "";
+    let subTotal = 0;
+
+    if (billItems.length === 0) {
+        container.innerHTML =
+            `<div style="color:var(--text-muted);text-align:center;margin-top:35px;font-size:10px;">बिल खाली है। कैटलॉग से चुनें या बोलिए! 😊</div>`;
+
+        document.getElementById("grandTotalText").innerText = "₹ 0";
+        return;
+    }
+
+    billItems.forEach((item, index) => {
+        subTotal += Number(item.total || 0);
+
+        const steps = getBillQuantitySteps(item);
+        const defaultStep = steps.find(step => step[0] === 0.1) ||
+            steps.find(step => step[0] === 100) ||
+            steps[0];
+
+        const options = steps.map(step =>
+            `<option value="${step[0]}" ${step[0] === defaultStep[0] ? "selected" : ""}>${step[1]}</option>`
+        ).join("");
+
+        container.innerHTML += `
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:5px;">
+                <div class="ledger-row">
+                    <input type="text"
+                        value="${item.name}"
+                        onchange="updateItem(${index}, 'name', this.value)"
+                        style="background:transparent;border:none;color:var(--accent-cyan);font-weight:bold;font-size:10px;width:28%;outline:none;"
+                        title="नाम">
+
+                    <input type="number"
+                        value="${item.qty}"
+                        min="0.001"
+                        step="0.001"
+                        onchange="updateItem(${index}, 'qty', this.value)"
+                        style="width:38px;background:#030712;border:1px solid rgba(0,243,255,0.3);color:#fff;font-size:9.5px;text-align:center;border-radius:3px;"
+                        title="मात्रा">
+
+                    <input type="text"
+                        value="${item.weight}"
+                        onchange="updateItem(${index}, 'weight', this.value)"
+                        style="width:38px;background:#030712;border:1px solid rgba(0,243,255,0.3);color:#fff;font-size:9.5px;text-align:center;border-radius:3px;"
+                        title="वजन">
+
+                    <input type="text"
+                        value="${item.quality}"
+                        onchange="updateItem(${index}, 'quality', this.value)"
+                        style="width:38px;background:#030712;border:1px solid rgba(0,243,255,0.3);color:#fff;font-size:9.5px;text-align:center;border-radius:3px;"
+                        title="क्वालिटी">
+
+                    <input type="number"
+                        value="${item.unitPrice}"
+                        onchange="updateItem(${index}, 'price', this.value)"
+                        style="width:45px;background:#030712;border:1px solid var(--accent-green);color:var(--accent-green);font-size:9.5px;text-align:center;border-radius:3px;"
+                        title="रेट">
+
+                    <span style="font-weight:bold;color:var(--accent-green);font-size:9.5px;">
+                        ₹${Number(item.total).toFixed(2)}
+                    </span>
+                </div>
+
+                <div style="display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:3px 5px;background:#061626;border:1px solid rgba(0,243,255,0.2);border-radius:6px;">
+                    <span style="font-size:10px;color:#fff;">मात्रा:</span>
+
+                    <button type="button"
+                        onclick="adjustItemQuantity(${index}, -1)"
+                        style="background:#8b2635;color:white;border:1px solid #ff5570;border-radius:5px;min-width:34px;padding:5px 10px;font-size:16px;font-weight:bold;">
+                        −
+                    </button>
+
+                    <select id="qtyStep_${index}"
+                        style="background:#030712;color:#00f3ff;border:1px solid #00f3ff;border-radius:5px;padding:5px;font-size:10px;max-width:105px;">
+                        ${options}
+                    </select>
+
+                    <button type="button"
+                        onclick="adjustItemQuantity(${index}, 1)"
+                        style="background:#087d45;color:white;border:1px solid #00ff66;border-radius:5px;min-width:34px;padding:5px 10px;font-size:16px;font-weight:bold;">
+                        +
+                    </button>
+                </div>
+            </div>`;
+    });
+
+    let taxAmount = (subTotal * currentTaxRate) / 100;
+    grandTotal = subTotal + taxAmount;
+
+    document.getElementById("grandTotalText").innerText =
+        `₹ ${grandTotal.toLocaleString("en-IN")} (GST/CST ${currentTaxRate}%)`;
+}
 
         function loadCustomerPhoto(event) {
             let file = event.target.files[0];
