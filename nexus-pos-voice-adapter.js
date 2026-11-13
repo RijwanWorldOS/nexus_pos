@@ -40,13 +40,26 @@
     return {};
   }
 
-  function getProducts() {
+ function getProducts() {
     const db = getDatabase();
+
     return Object.keys(db).map(key => {
-      const p = db[key];
-      return p && typeof p === "object" ? Object.assign({ barcode: key }, p) : null;
-    }).filter(p => p && p.name && p.barcode && Number(p.salePrice) > 0);
-  }
+        const p = db[key];
+
+        if (!p || typeof p !== "object") return null;
+
+        return Object.assign({}, p, {
+            barcode: String(p.barcode || key)
+        });
+    }).filter(p =>
+        p &&
+        typeof p.name === "string" &&
+        p.name.trim() !== "" &&
+        p.barcode &&
+        Number.isFinite(Number(p.salePrice)) &&
+        Number(p.salePrice) > 0
+    );
+} 
 
   const NUMBER_WORDS = {
     "आधा":0.5, "अध":0.5, "पाव":0.25, "डेढ़":1.5, "डेढ":1.5, "ढाई":2.5,
