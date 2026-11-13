@@ -144,6 +144,27 @@
     <button class="tool-btn" data-sector-id="H05" onclick="switchCatalogTab('H05')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">🔩 हार्डवेयर</button>
     <button class="tool-btn" data-sector-id="H10" onclick="switchCatalogTab('H10')" style="flex:1; background:rgba(0,243,255,0.15); color:var(--accent-cyan); font-size:8px;">💄 कॉस्मेटिक</button>
     <button class="tool-btn" data-sector-id="H03" onclick="switchCatalogTab('H03')" style="flex:1; background:rgba(241,196,15,0.15); color:var(--accent-gold); font-size:8px;">🍽️ रेस्टोरेंट</button>
+</div><div id="manualProductEntry" style="display:flex;flex-direction:column;gap:6px;background:#071120;padding:8px;border:1px solid var(--accent-cyan);border-radius:7px;">
+    <b style="color:var(--accent-cyan);">➕ अपना Product DNA बनाएं</b>
+
+    <button type="button" class="tool-btn" onclick="toggleProductDnaVoice()" style="background:#7b1740;color:white;padding:9px;">
+        🎙️ बोलकर सामान जोड़ें
+    </button>
+
+    <div id="productDnaVoiceStatus" style="font-size:10px;color:var(--accent-gold);">
+        उदाहरण: नया सामान चीनी एक किलो खरीद 40 बिक्री 50 स्टॉक 20
+    </div>
+
+    <input id="newItemNameInput" type="text" placeholder="सामान का नाम">
+    <input id="newItemBarcodeInput" type="text" placeholder="बारकोड वैकल्पिक">
+    <input id="newItemCostInput" type="number" min="0" step="0.01" placeholder="खरीद मूल्य">
+    <input id="newItemPriceInput" type="number" min="0.01" step="0.01" placeholder="बिक्री मूल्य">
+    <input id="newItemStockInput" type="number" min="0" step="0.001" placeholder="स्टॉक">
+    <input id="newItemUnitInput" type="text" placeholder="यूनिट: kg, g, piece, litre">
+
+    <button type="button" class="tool-btn" onclick="addNewCustomCatalogItem()" style="background:var(--accent-green);color:#030712;padding:9px;">
+        💾 Product DNA सेव करें
+    </button>
 </div>
             <div id="catalogItemsGrid" style="flex:1; background:#040914; border:1.5px solid rgba(0,243,255,0.3); border-radius:8px; padding:6px; display:grid; grid-template-columns: repeat(2, 1fr); gap:6px; overflow-y:auto;"></div>
         </div>
