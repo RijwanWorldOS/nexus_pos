@@ -220,21 +220,136 @@ function getProducts() {
       .replace(/\s+/g, " ").trim();
   }
 
-  function matchProducts(query) {
+ function matchProducts(query) {
     const q = cleanCommandName(query);
     if (!q) return [];
 
-    const qTokens = q.split(" ").filter(Boolean);
+    const stopWords = new Set([
+      "का", "की", "के", "में", "पर", "एक", "दो",
+      "please", "the", "a", "an", "and", "for"
+    ]);
+
+    const queryTokens = q.split(/\s+/)
+      .filter(token => token && !stopWords.has(token));
+
+    if (!queryTokens.length) return [];
+
+    function editDistance(a, b) {
+      const row = Array.from({ length:b.length + 1 }, (_,i) => i);
+
+      for (let i = 1; i <= a.length; i++) {
+        let previous = row[0];
+        row[0] = i;
+
+        for (let j = 1; j <= b.length; j++) {
+          const old = row[j];
+          row[j] = Math.min(
+            row[j] + 1,
+            row[j - 1] + 1,
+            previous + (a[i - 1] === b[j - 1] ? 0 : 1)
+          );
+          previous = old;
+        }
+      }
+
+      return row[b.length];
+    }
+
+    function valuesOf(value) {
+      if (Array.isArray(value)) return value.map(String);
+      if (typeof value === "string") return [value];
+      return [];
+    }
+
     const products = getProducts();
     const scored = [];
 
     products.forEach(product => {
-      const rawName = norm(product.name);
-      const searchable = norm([product.name, product.description || ""].join(" "));
-      const nameTokens = productNameForMatch(product.name).split(" ").filter(Boolean);
-      const allTokensPresent = qTokens.every(token => searchable.includes(token));
-      const direct = rawName === q || rawName.includes(q) || q.includes(productNameForMatch(product.name));
-      const overlap = qTokens.filter(token => searchable.includes(token)).length;
+      const names = [
+        product.name,
+        ...valuesOf(product.aliases),
+        ...valuesOf(product.synonyms),
+        ...valuesOf(product.alternateNames)
+      ].map(norm).filter(Boolean);
+
+      const extraFields = [
+        product.description,
+        product.brand,
+        product.category,
+        product.sku,
+        product.barcode,
+        product.itemCode,
+        product.model,
+        product.genericName
+      ].map(norm).filter(Boolean);
+
+      const nameTokens = names.flatMap(name =>
+        productNameForMatch(name).split(/\s+/)
+      ).filter(Boolean);
+
+      const searchableTokens = [
+        ...nameTokens,
+        ...extraFields.flatMap(value => value.split(/\s+/))
+      ];
+
+      if (!searchableTokens.length) return;
+
+      let matched = 0;
+      let nameMatched = 0;
+
+      queryTokens.forEach(token => {
+        const exact = searchableTokens.some(item => item === token);
+        const partial = searchableTokens.some(item =>
+          item.length >= 3 &&
+          (item.includes(token) || token.includes(item))
+        );
+
+        const fuzzy = !exact && !partial &&
+          token.length >= 5 &&
+          searchableTokens.some(item =>
+            item.length >= 5 &&
+            editDistance(token, item) <= 1
+          );
+
+        if (exact || partial || fuzzy) {
+          matched++;
+          if (nameTokens.some(item =>
+            item === token ||
+            (item.length >= 3 && item.includes(token))
+          )) {
+            nameMatched++;
+          }
+        }
+      });
+
+      const coverage = matched / queryTokens.length;
+
+      if (coverage < 0.70 || nameMatched === 0) return;
+
+      const exactName = names.some(name =>
+        name === q || productNameForMatch(name) === q
+      );
+
+      const score =
+        coverage * 100 +
+        nameMatched * 12 +
+        (exactName ? 50 : 0);
+
+      scored.push({ product, score });
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+
+    if (!scored.length) return [];
+
+    const topScore = scored[0].score;
+
+    return scored
+      .filter(item =>
+        item.score >= topScore - Math.max(5, topScore * 0.08)
+      )
+      .map(item => item.product);
+  } 
 
       if (direct || allTokensPresent) {
         scored.push({ product, score:(direct ? 100 : 0) + overlap + nameTokens.length / 100 });
