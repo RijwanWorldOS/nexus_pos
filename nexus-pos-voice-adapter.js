@@ -189,7 +189,7 @@
     }
 
     return { quantity:1, spokenUnit:"", found:false, cleaned:s };
-  }
+}
 
   function productNameForMatch(name) {
     return norm(name).replace(/[()]/g, " ").replace(/\b\d+(?:\.\d+)?\b/g, " ").replace(/\s+/g, " ").trim();
