@@ -844,10 +844,14 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
         return;
     }
 
-    let existing = billItems.find(item =>
-        barcode ? item.barcode === barcode :
-        (!item.barcode && item.name === name)
-    );
+   let existing = billItems.find(item =>
+        barcode
+            ? item.barcode === barcode &&
+              Number(item.unitPrice) === unitPrice
+            : !item.barcode &&
+              item.name === name &&
+              Number(item.unitPrice) === unitPrice
+    ); 
 
     if (barcode) {
         const database = loadProductDNA();
