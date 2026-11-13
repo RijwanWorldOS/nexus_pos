@@ -437,68 +437,22 @@ function rateUnitFromText(text) {
     }
 
     const product = matches[0];
-   function getProducts() {
-    const db = getDatabase();
+   function if (product.source === "world-js-catalog") {
+      const nameInput = document.getElementById("newItemNameInput");
+      const unitInput = document.getElementById("newItemUnitInput");
 
-    const saved = Object.keys(db).map(key => {
-      const p = db[key];
-      if (!p || typeof p !== "object") return null;
+      if (nameInput) nameInput.value = product.name;
+      if (unitInput) unitInput.value = product.unit || "";
 
-      return Object.assign({}, p, {
-        barcode: String(p.barcode || key),
-        source: "product-dna"
-      });
-    }).filter(p =>
-      p &&
-      typeof p.name === "string" &&
-      p.name.trim() !== "" &&
-      p.barcode
-    );
+      const costInput = document.getElementById("newItemCostInput");
+      if (costInput) costInput.focus();
 
-    // JavaScript starter catalog: केवल सामान पहचानने के लिए।
-    // इसका sample price असली दुकान का बिक्री रेट नहीं है।
-    const sectorCatalogKey = {
-      H01: "kirana",
-      H02: "pharmacy",
-      H03: "restaurant",
-      H04: "clothing",
-      H05: "hardware",
-      H10: "cosmetics",
-      H21: "dairy"
-    };
+      const message = product.name +
+        " पहचान लिया है। पहले इसका खरीद रेट, बिक्री रेट और स्टॉक Product DNA में सेव करें। अभी बिल में नहीं जोड़ा गया।";
 
-    let starter = [];
-
-    try {
-      const key = sectorCatalogKey[String(activeSectorId || "").toUpperCase()];
-
-      if (
-        key &&
-        typeof worldBusinessDictionary !== "undefined" &&
-        Array.isArray(worldBusinessDictionary[key])
-      ) {
-        starter = worldBusinessDictionary[key].map((p, index) => ({
-          name: String(p.name || ""),
-          description: "",
-          unit: (
-            (String(p.name || "").match(/\((\d+(?:\.\d+)?)(kg|g|l|ml)\)/i) || [])[2] || ""
-          ),
-          salePrice: null,
-          stock: null,
-          barcode: "__js_catalog__" + key + "_" + index,
-          source: "world-js-catalog"
-        }));
-      }
-    } catch (error) {
-      console.warn("Nexus starter catalog unavailable:", error);
+      say(message);
+      return { ok:false, error:"product_not_registered" };
     }
-
-    const savedNames = new Set(saved.map(p => norm(p.name)));
-
-    return saved.concat(
-      starter.filter(p => p.name && !savedNames.has(norm(p.name)))
-    );
-  } 
     const qtyInfo = convertQuantity(parsed.quantity.quantity, parsed.quantity.spokenUnit, product.unit);
 
     if (!qtyInfo.ok) {
