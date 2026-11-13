@@ -351,17 +351,7 @@ function getProducts() {
       .map(item => item.product);
   } 
 
-      if (direct || allTokensPresent) {
-        scored.push({ product, score:(direct ? 100 : 0) + overlap + nameTokens.length / 100 });
-      }
-    });
-
-    scored.sort((a,b) => b.score-a.score);
-    if (!scored.length) return [];
-
-    const top = scored[0].score;
-    return scored.filter(x => x.score === top).map(x => x.product);
-  }
+      
 function canonicalUnit(value) {
     const s = norm(value);
     if (/क्विंटल|कुन्टल|quintal|qtl/.test(s)) return "quintal";
