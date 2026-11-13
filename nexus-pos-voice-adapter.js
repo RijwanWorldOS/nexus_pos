@@ -164,32 +164,8 @@
     return { quantity:1, spokenUnit:"", found:false, cleaned:s };
   }
 
-  function parseQuantity(text) {
-    const s = norm(text);
-    const unitPattern = UNIT_ALIASES.map(x => x.re).join("|");
-    const numberPattern = "\\d+(?:\\.\\d+)?|आधा|अध|पाव|डेढ़|डेढ|ढाई|एक|दो|तीन|चार|पांच|पाँच|छह|सात|आठ|नौ|दस|one|two|three|four|five|six|seven|eight|nine|ten";
-    const re = new RegExp("(?:^|\\s)(" + numberPattern + ")\\s*(" + unitPattern + ")(?:\\s|$)", "i");
-    const match = s.match(re);
-
-    if (match) {
-      const raw = match[1];
-      const quantity = Object.prototype.hasOwnProperty.call(NUMBER_WORDS, raw) ? NUMBER_WORDS[raw] : Number(raw);
-      const unit = UNIT_ALIASES.find(x => new RegExp("^(?:" + x.re + ")$", "i").test(match[2]));
-      const cleaned = s.replace(match[0], " ").replace(/\s+/g, " ").trim();
-      return { quantity, spokenUnit:unit ? unit.unit : "", found:true, cleaned };
-    }
-
-    const plainNumber = s.match(new RegExp("(?:^|\\s)(" + numberPattern + ")(?:\\s|$)", "i"));
-
-    if (plainNumber) {
-      const raw = plainNumber[1];
-      const quantity = Object.prototype.hasOwnProperty.call(NUMBER_WORDS, raw) ? NUMBER_WORDS[raw] : Number(raw);
-      const cleaned = s.replace(plainNumber[0], " ").replace(/\s+/g, " ").trim();
-      return { quantity, spokenUnit:"", found:true, cleaned };
-    }
-
-    return { quantity:1, spokenUnit:"", found:false, cleaned:s };
-}
+  
+  
 
   function productNameForMatch(name) {
     return norm(name).replace(/[()]/g, " ").replace(/\b\d+(?:\.\d+)?\b/g, " ").replace(/\s+/g, " ").trim();
