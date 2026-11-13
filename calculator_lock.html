@@ -78,20 +78,6 @@
             </select>
             <button class="tool-btn" onclick="clearBill();" style="color: var(--accent-red);">🗑️ Reset</button>
         </div>
-<div id="manualProductEntry" style="display:flex; flex-direction:column; gap:5px; background:#071120; padding:7px; border:1px solid var(--accent-cyan); border-radius:7px;">
-            <b style="font-size:10px; color:var(--accent-cyan);">➕ नया सामान कैटलॉग में जोड़ें</b>
-
-            <input id="newItemNameInput" type="text" placeholder="सामान का पूरा नाम">
-            <input id="newItemBarcodeInput" type="text" placeholder="बारकोड (वैकल्पिक)">
-            <input id="newItemCostInput" type="number" min="0" step="0.01" placeholder="खरीद मूल्य ₹">
-            <input id="newItemPriceInput" type="number" min="0.01" step="0.01" placeholder="बिक्री मूल्य ₹">
-            <input id="newItemStockInput" type="number" min="0" step="0.001" placeholder="उपलब्ध स्टॉक">
-            <input id="newItemUnitInput" type="text" placeholder="यूनिट: पीस, किलो, लीटर...">
-
-            <button class="tool-btn" onclick="addNewCustomCatalogItem()" style="background:var(--accent-green); color:#030712; padding:7px;">
-                💾 Product DNA में सेव करें
-            </button>
-        </div>
         
 <!-- Product search: place after the custom-item row, before the customer box -->
 <div style="display:flex; flex-direction:column; gap:4px;">
