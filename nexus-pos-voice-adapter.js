@@ -504,6 +504,88 @@ function rateUnitFromText(text) {
       return false;
     }
   }
+ function toggleProductDnaVoice() {
+    const voice = window.NexusVoice;
+
+    if (!voice) {
+        alert("Nexus Voice Engine लोड नहीं हुआ।");
+        return;
+    }
+
+    if (voice.getStatus().listening) {
+        voice.stopListening();
+        return;
+    }
+
+    const result = voice.startListening({
+        execute: true,
+        language: "hi-IN"
+    });
+
+    if (!result.ok) {
+        alert(result.message || "माइक शुरू नहीं हुआ।");
+    }
+}
+
+function handleProductRegistrationSpeech(text) {
+    const source = norm(text);
+    const quantity = parseQuantity(source);
+
+    const costMatch = source.match(/(?:खरीद|लागत|cost)\s*(?:रेट|मूल्य)?\s*([0-9]+(?:\.[0-9]+)?)/i);
+    const saleMatch = source.match(/(?:बिक्री|सेल|sale)\s*(?:रेट|मूल्य)?\s*([0-9]+(?:\.[0-9]+)?)/i);
+    const stockMatch = source.match(/(?:स्टॉक|उपलब्ध)\s*([0-9]+(?:\.[0-9]+)?)/i);
+
+    if (!quantity.found || !quantity.spokenUnit || !costMatch || !saleMatch || !stockMatch) {
+        const message = "नाम, मात्रा, खरीद रेट, बिक्री रेट और स्टॉक स्पष्ट बोलें।";
+        const status = document.getElementById("productDnaVoiceStatus");
+        if (status) status.textContent = message;
+        say(message);
+        return { ok: false, message };
+    }
+
+    let name = quantity.cleaned
+        .replace(/^(नया सामान|नया प्रोडक्ट|product dna|new product)\s*/i, "")
+        .replace(/(?:खरीद|लागत|cost)\s*(?:रेट|मूल्य)?\s*[0-9]+(?:\.[0-9]+)?/i, "")
+        .replace(/(?:बिक्री|सेल|sale)\s*(?:रेट|मूल्य)?\s*[0-9]+(?:\.[0-9]+)?/i, "")
+        .replace(/(?:स्टॉक|उपलब्ध)\s*[0-9]+(?:\.[0-9]+)?/i, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!name) {
+        return { ok: false, message: "सामान का नाम नहीं मिला।" };
+    }
+
+    const fields = {
+        newItemNameInput: name,
+        newItemCostInput: Number(costMatch[1]),
+        newItemPriceInput: Number(saleMatch[1]),
+        newItemStockInput: Number(stockMatch[1]),
+        newItemUnitInput: quantity.spokenUnit
+    };
+
+    Object.keys(fields).forEach(function(id) {
+        const element = document.getElementById(id);
+        if (element) element.value = fields[id];
+    });
+
+    const message = name + " का विवरण भर दिया गया है। खरीद " +
+        fields.newItemCostInput + " रुपये, बिक्री " +
+        fields.newItemPriceInput + " रुपये, स्टॉक " +
+        fields.newItemStockInput + " " + quantity.spokenUnit +
+        "। सेव करने से पहले जाँच लें।";
+
+    const status = document.getElementById("productDnaVoiceStatus");
+    if (status) status.textContent = message;
+
+    say(message);
+
+    if (window.confirm(message + "\nक्या Product DNA सेव करना है?")) {
+        addNewCustomCatalogItem();
+        return { ok: true };
+    }
+
+    return { ok: false, cancelled: true };
+} 
   function togglePosVoice() {
     const voice = window.NexusVoice;
 
