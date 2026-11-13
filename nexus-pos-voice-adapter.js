@@ -242,7 +242,7 @@ function canonicalUnit(value) {
     return "";
   }
 
-  function convertQuantity(quantity, spokenUnit, productUnit) {
+function convertQuantity(quantity, spokenUnit, productUnit) {
     const target = canonicalUnit(productUnit);
 
     if (!spokenUnit) {
@@ -260,15 +260,24 @@ function canonicalUnit(value) {
       return { ok:true, quantity, label:quantity + " " + spokenUnit };
     }
 
-    const conversions = {
-      kg:{ g:0.001 },
-      g:{ kg:1000 },
-      l:{ ml:0.001 },
-      ml:{ l:1000 }
+    const toKg = {
+      g:0.001,
+      kg:1,
+      quintal:100
     };
 
-    if (conversions[target] && conversions[target][spokenUnit]) {
-      const converted = quantity * conversions[target][spokenUnit];
+    const toLitre = {
+      ml:0.001,
+      l:1
+    };
+
+    if (toKg[spokenUnit] && toKg[target]) {
+      const converted = quantity * toKg[spokenUnit] / toKg[target];
+      return { ok:true, quantity:converted, label:quantity + " " + spokenUnit };
+    }
+
+    if (toLitre[spokenUnit] && toLitre[target]) {
+      const converted = quantity * toLitre[spokenUnit] / toLitre[target];
       return { ok:true, quantity:converted, label:quantity + " " + spokenUnit };
     }
 
@@ -276,7 +285,11 @@ function canonicalUnit(value) {
       ok:false,
       message:"बोली गई मात्रा और Product DNA की यूनिट अलग हैं। यूनिट स्पष्ट करके दोबारा बोलें।"
     };
-  }
+  }  
+
+    
+
+  
 
   function parseBillSpeech(text) {
     const quantity = parseQuantity(text);
