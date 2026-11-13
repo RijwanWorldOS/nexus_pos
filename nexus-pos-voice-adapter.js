@@ -40,24 +40,68 @@ let pendingRate = null;
     return {};
   }
 
- function getProducts() {
+function getProducts() {
     const db = getDatabase();
 
-    return Object.keys(db).map(key => {
-        const p = db[key];
+    const saved = Object.keys(db).map(key => {
+      const p = db[key];
+      if (!p || typeof p !== "object") return null;
 
-        if (!p || typeof p !== "object") return null;
+      return Object.assign({}, p, {
+        barcode: String(p.barcode || key),
+        source: "product-dna"
+      });
+    }).filter(p =>
+      p &&
+      typeof p.name === "string" &&
+      p.name.trim() !== "" &&
+      p.barcode
+    );
 
-        return Object.assign({}, p, {
-            barcode: String(p.barcode || key)
-        });
-}).filter(p =>
-        p &&
-        typeof p.name === "string" &&
-        p.name.trim() !== "" &&
-        p.barcode
-    );    
-} 
+    // JavaScript starter catalog: केवल सामान पहचानने के लिए।
+    // इसका sample price असली दुकान का बिक्री रेट नहीं है।
+    const sectorCatalogKey = {
+      H01: "kirana",
+      H02: "pharmacy",
+      H03: "restaurant",
+      H04: "clothing",
+      H05: "hardware",
+      H10: "cosmetics",
+      H21: "dairy"
+    };
+
+    let starter = [];
+
+    try {
+      const key = sectorCatalogKey[String(activeSectorId || "").toUpperCase()];
+
+      if (
+        key &&
+        typeof worldBusinessDictionary !== "undefined" &&
+        Array.isArray(worldBusinessDictionary[key])
+      ) {
+        starter = worldBusinessDictionary[key].map((p, index) => ({
+          name: String(p.name || ""),
+          description: "",
+          unit: (
+            (String(p.name || "").match(/\((\d+(?:\.\d+)?)(kg|g|l|ml)\)/i) || [])[2] || ""
+          ),
+          salePrice: null,
+          stock: null,
+          barcode: "__js_catalog__" + key + "_" + index,
+          source: "world-js-catalog"
+        }));
+      }
+    } catch (error) {
+      console.warn("Nexus starter catalog unavailable:", error);
+    }
+
+    const savedNames = new Set(saved.map(p => norm(p.name)));
+
+    return saved.concat(
+      starter.filter(p => p.name && !savedNames.has(norm(p.name)))
+    );
+  }  
 
   const NUMBER_WORDS = {
     "आधा":0.5, "अध":0.5, "पाव":0.25, "डेढ़":1.5, "डेढ":1.5, "ढाई":2.5,
@@ -393,6 +437,68 @@ function rateUnitFromText(text) {
     }
 
     const product = matches[0];
+   function getProducts() {
+    const db = getDatabase();
+
+    const saved = Object.keys(db).map(key => {
+      const p = db[key];
+      if (!p || typeof p !== "object") return null;
+
+      return Object.assign({}, p, {
+        barcode: String(p.barcode || key),
+        source: "product-dna"
+      });
+    }).filter(p =>
+      p &&
+      typeof p.name === "string" &&
+      p.name.trim() !== "" &&
+      p.barcode
+    );
+
+    // JavaScript starter catalog: केवल सामान पहचानने के लिए।
+    // इसका sample price असली दुकान का बिक्री रेट नहीं है।
+    const sectorCatalogKey = {
+      H01: "kirana",
+      H02: "pharmacy",
+      H03: "restaurant",
+      H04: "clothing",
+      H05: "hardware",
+      H10: "cosmetics",
+      H21: "dairy"
+    };
+
+    let starter = [];
+
+    try {
+      const key = sectorCatalogKey[String(activeSectorId || "").toUpperCase()];
+
+      if (
+        key &&
+        typeof worldBusinessDictionary !== "undefined" &&
+        Array.isArray(worldBusinessDictionary[key])
+      ) {
+        starter = worldBusinessDictionary[key].map((p, index) => ({
+          name: String(p.name || ""),
+          description: "",
+          unit: (
+            (String(p.name || "").match(/\((\d+(?:\.\d+)?)(kg|g|l|ml)\)/i) || [])[2] || ""
+          ),
+          salePrice: null,
+          stock: null,
+          barcode: "__js_catalog__" + key + "_" + index,
+          source: "world-js-catalog"
+        }));
+      }
+    } catch (error) {
+      console.warn("Nexus starter catalog unavailable:", error);
+    }
+
+    const savedNames = new Set(saved.map(p => norm(p.name)));
+
+    return saved.concat(
+      starter.filter(p => p.name && !savedNames.has(norm(p.name)))
+    );
+  } 
     const qtyInfo = convertQuantity(parsed.quantity.quantity, parsed.quantity.spokenUnit, product.unit);
 
     if (!qtyInfo.ok) {
