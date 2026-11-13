@@ -229,8 +229,9 @@
     const top = scored[0].score;
     return scored.filter(x => x.score === top).map(x => x.product);
   }
- function canonicalUnit(value) {
+function canonicalUnit(value) {
     const s = norm(value);
+    if (/क्विंटल|कुन्टल|quintal|qtl/.test(s)) return "quintal";
     if (/kg|किलो|किलोग्राम|किग्रा/.test(s)) return "kg";
     if (/^g$|ग्राम|gm|ग्रा/.test(s)) return "g";
     if (/^l$|लीटर|लिटर|ltr/.test(s)) return "l";
