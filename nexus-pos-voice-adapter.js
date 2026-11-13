@@ -7,7 +7,7 @@
 
   if (window.__NEXUS_POS_VOICE_ADAPTER__) return;
   window.__NEXUS_POS_VOICE_ADAPTER__ = true;
-
+let pendingRate = null;
   function say(message) {
     if (window.NexusVoice && typeof window.NexusVoice.speak === "function") {
       window.NexusVoice.speak(message, { language: language() });
