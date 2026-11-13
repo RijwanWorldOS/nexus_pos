@@ -445,7 +445,7 @@
     }
 
     recognition.lang = options.language || STATE.language;
-    recognition.continuous = options.continuous === true;
+    recognition.continuous = options.continuous !== false;
     recognition.interimResults = options.interimResults === true;
     recognition.maxAlternatives = Math.max(
       1,
@@ -614,6 +614,21 @@
 
       STATE.lastResult = result;
       emit("commandresult", result);
+   STATE.lastResult = result;
+      emit("commandresult", result);
+
+      const replyText = result && (
+        result.message ||
+        (result.result && result.result.message)
+      );
+
+      if (replyText) {
+        speak(replyText, {
+          language: options.language || STATE.language
+        });
+      }
+
+      return result;    
 
       return result;
     } catch (error) {
