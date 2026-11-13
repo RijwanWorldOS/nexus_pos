@@ -437,7 +437,7 @@ function rateUnitFromText(text) {
     }
 
     const product = matches[0];
-   function if (product.source === "world-js-catalog") {
+  if (product.source === "world-js-catalog") { 
       const nameInput = document.getElementById("newItemNameInput");
       const unitInput = document.getElementById("newItemUnitInput");
 
@@ -660,7 +660,7 @@ function handleProductRegistrationSpeech(text) {
       voice.stopListening();
       return;
     }
-
+syncBusinessContext();
     const result = voice.startListening({
       execute:true,
       language:language()
