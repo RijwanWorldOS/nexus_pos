@@ -51,14 +51,12 @@
         return Object.assign({}, p, {
             barcode: String(p.barcode || key)
         });
-    }).filter(p =>
+}).filter(p =>
         p &&
         typeof p.name === "string" &&
         p.name.trim() !== "" &&
-        p.barcode &&
-        Number.isFinite(Number(p.salePrice)) &&
-        Number(p.salePrice) > 0
-    );
+        p.barcode
+    );    
 } 
 
   const NUMBER_WORDS = {
