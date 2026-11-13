@@ -274,7 +274,110 @@ function convertQuantity(quantity, spokenUnit, productUnit) {
   function isAddIntent(text) {
     return /जोड़|जोड़|डाल|बिल में|ऐड|add|put|include|लगा दो/.test(norm(text));
   }
+function rateUnitFromText(text) {
+    const s = norm(text);
 
+    for (const item of UNIT_ALIASES) {
+      if (new RegExp("(?:प्रति|पर|per)?\\s*(?:" +
+        item.re + ")(?:\\s|$)", "i").test(s)) {
+        return item.unit;
+      }
+    }
+
+    return "";
+  }
+
+  function extractRateAmount(text) {
+    const s = norm(text);
+    const words = Object.keys(NUMBER_WORDS)
+      .sort((a, b) => b.length - a.length).join("|");
+
+    const re = new RegExp(
+      "(\\d+(?:\\.\\d+)?|" + words +
+      ")(?:\\s+(?:\\d+(?:\\.\\d+)?|" + words + ")){0,2}", "i"
+    );
+
+    const match = s.match(re);
+    if (!match) return null;
+
+    const amount = parseSpokenNumber(match[0]);
+
+    return Number.isFinite(amount) && amount > 0
+      ? amount
+      : null;
+  }
+
+  function saveProductRate(product, amount, spokenUnit) {
+    const productUnit = canonicalUnit(product.unit);
+
+    const weight = ["g", "kg", "quintal"];
+    const liquid = ["ml", "l"];
+    const count = ["piece", "packet", "box"];
+
+    const compatible =
+      (weight.includes(spokenUnit) && weight.includes(productUnit)) ||
+      (liquid.includes(spokenUnit) && liquid.includes(productUnit)) ||
+      (count.includes(spokenUnit) && spokenUnit === productUnit);
+
+    const factors = {
+      g: 0.001,
+      kg: 1,
+      quintal: 100,
+      ml: 0.001,
+      l: 1,
+      piece: 1,
+      packet: 1,
+      box: 1
+    };
+
+    if (!compatible || !factors[spokenUnit] || !factors[productUnit]) {
+      return {
+        ok: false,
+        message: "रेट की यूनिट Product DNA यूनिट से मेल नहीं खाती।"
+      };
+    }
+
+    const price = amount * factors[productUnit] / factors[spokenUnit];
+
+    if (!Number.isFinite(price) || price <= 0) {
+      return { ok: false, message: "रेट सही नहीं है।" };
+    }
+
+    const db = getDatabase();
+    const key = String(product.barcode || "");
+
+    if (!key || !db[key]) {
+      return { ok: false, message: "प्रोडक्ट Product DNA में नहीं मिला।" };
+    }
+
+    if (typeof saveProductDNA !== "function") {
+      return {
+        ok: false,
+        message: "Product DNA सेव फ़ंक्शन उपलब्ध नहीं है।"
+      };
+    }
+
+    db[key].salePrice = Number(price.toFixed(8));
+    db[key].updatedAt = new Date().toISOString();
+
+    saveProductDNA(db);
+
+    const saved = getDatabase()[key];
+
+    if (!saved ||
+        Math.abs(Number(saved.salePrice) - price) > 0.0000001) {
+      return {
+        ok: false,
+        message: "रेट सेव होने की पुष्टि नहीं हुई।"
+      };
+    }
+
+    return {
+      ok: true,
+      price: Number(saved.salePrice),
+      unit: productUnit
+    };
+  }
   function handleProductSpeech(text) {
     const parsed = parseBillSpeech(text);
     const matches = matchProducts(parsed.nameQuery);
