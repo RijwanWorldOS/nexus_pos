@@ -614,8 +614,6 @@
 
       STATE.lastResult = result;
       emit("commandresult", result);
-   STATE.lastResult = result;
-      emit("commandresult", result);
 
       const replyText = result && (
         result.message ||
@@ -627,8 +625,6 @@
           language: options.language || STATE.language
         });
       }
-
-      return result;    
 
       return result;
     } catch (error) {
