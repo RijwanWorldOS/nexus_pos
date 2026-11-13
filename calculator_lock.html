@@ -870,9 +870,10 @@ function addItem(name, qty, weight, quality, price, productMeta = null) {
     }
 
     if (existing) {
-        existing.qty += quantity;
-        existing.total = existing.qty * existing.unitPrice;
-    } else {
+    existing.qty += quantity;
+    existing.unitPrice = unitPrice;
+    existing.total = existing.qty * existing.unitPrice;
+} else {
         billItems.push({
             name: name,
             qty: quantity,
