@@ -65,11 +65,19 @@
     "आधा":0.5, "अध":0.5, "पाव":0.25, "डेढ़":1.5, "डेढ":1.5, "ढाई":2.5,
     "एक":1, "दो":2, "तीन":3, "चार":4, "पांच":5, "पाँच":5,
     "छह":6, "सात":7, "आठ":8, "नौ":9, "दस":10,
+    "ग्यारह":11, "बारह":12, "तेरह":13, "चौदह":14, "पंद्रह":15,
+    "सोलह":16, "सत्रह":17, "अठारह":18, "उन्नीस":19, "बीस":20,
+    "तीस":30, "चालीस":40, "पचास":50, "साठ":60, "सत्तर":70,
+    "अस्सी":80, "नब्बे":90, "सौ":100, "हजार":1000, "हज़ार":1000,
     "one":1, "two":2, "three":3, "four":4, "five":5,
-    "six":6, "seven":7, "eight":8, "nine":9, "ten":10
+    "six":6, "seven":7, "eight":8, "nine":9, "ten":10,
+    "twenty":20, "thirty":30, "forty":40, "fifty":50,
+    "sixty":60, "seventy":70, "eighty":80, "ninety":90,
+    "hundred":100, "thousand":1000
   };
 
   const UNIT_ALIASES = [
+    { re:"क्विंटल|कुन्टल|क्विंटल्स|quintals?|qtl", unit:"quintal" },
     { re:"किलोग्राम|किलो|किग्रा|kgs?|kg", unit:"kg" },
     { re:"ग्राम|ग्रा|grams?|gms?|gm|g", unit:"g" },
     { re:"लीटर|लिटर|litres?|liters?|ltr|lt|l", unit:"l" },
@@ -78,6 +86,83 @@
     { re:"पैकेट|पैकट|packet|packets|पैक", unit:"packet" },
     { re:"डिब्बा|डब्बा|बॉक्स|box|boxes", unit:"box" }
   ];
+
+  function parseSpokenNumber(raw) {
+    const s = norm(raw);
+    if (Object.prototype.hasOwnProperty.call(NUMBER_WORDS, s)) {
+      return NUMBER_WORDS[s];
+    }
+    if (/^\d+(?:\.\d+)?$/.test(s)) return Number(s);
+
+    const tokens = s.split(/\s+/);
+    let total = 0;
+    let current = 0;
+
+    tokens.forEach(token => {
+      if (!Object.prototype.hasOwnProperty.call(NUMBER_WORDS, token)) return;
+      const value = NUMBER_WORDS[token];
+
+      if (value === 100 || value === 1000) {
+        current = Math.max(1, current) * value;
+        total += current;
+        current = 0;
+      } else {
+        current += value;
+      }
+    });
+
+    return total + current;
+  }
+
+  function parseQuantity(text) {
+    const s = norm(text);
+    const unitPattern = UNIT_ALIASES.map(x => x.re).join("|");
+    const numberPattern =
+      "\\d+(?:\\.\\d+)?|आधा|अध|पाव|डेढ़|डेढ|ढाई|" +
+      "एक|दो|तीन|चार|पांच|पाँच|छह|सात|आठ|नौ|दस|" +
+      "ग्यारह|बारह|तेरह|चौदह|पंद्रह|सोलह|सत्रह|अठारह|उन्नीस|" +
+      "बीस|तीस|चालीस|पचास|साठ|सत्तर|अस्सी|नब्बे|सौ|हजार|हज़ार|" +
+      "one|two|three|four|five|six|seven|eight|nine|ten|" +
+      "twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand";
+
+    const re = new RegExp(
+      "(?:^|\\s)(" + numberPattern + "(?:\\s+(?:" +
+      numberPattern + "))?)\\s*(" + unitPattern + ")(?:\\s|$)", "i"
+    );
+    const match = s.match(re);
+
+    if (match) {
+      const quantity = parseSpokenNumber(match[1]);
+      const unit = UNIT_ALIASES.find(x =>
+        new RegExp("^(?:" + x.re + ")$", "i").test(match[2])
+      );
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return { quantity:0, spokenUnit:"", found:false, cleaned:s };
+      }
+      return {
+        quantity,
+        spokenUnit:unit ? unit.unit : "",
+        found:true,
+        cleaned:s.replace(match[0], " ").replace(/\s+/g, " ").trim()
+      };
+    }
+
+    const plain = s.match(new RegExp(
+      "(?:^|\\s)(" + numberPattern + ")(?:\\s|$)", "i"
+    ));
+
+    if (plain) {
+      const quantity = parseSpokenNumber(plain[1]);
+      return {
+        quantity,
+        spokenUnit:"",
+        found:Number.isFinite(quantity) && quantity > 0,
+        cleaned:s.replace(plain[0], " ").replace(/\s+/g, " ").trim()
+      };
+    }
+
+    return { quantity:1, spokenUnit:"", found:false, cleaned:s };
+  }
 
   function parseQuantity(text) {
     const s = norm(text);
