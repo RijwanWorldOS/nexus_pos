@@ -633,14 +633,20 @@ function handleProductRegistrationSpeech(text) {
         "draft_billing"
       ],
       getProducts,
-      handleCommand:function (context) {
-        if (isAddIntent(context.text)) return handleProductSpeech(context.text);
+   handleCommand:function (context) {
+        if (/(नया सामान|नया प्रोडक्ट|product dna|new product)/i.test(norm(context.text))) {
+          return handleProductRegistrationSpeech(context.text);
+        }
+
+        if (isAddIntent(context.text)) {
+          return handleProductSpeech(context.text);
+        }
 
         return {
           ok:false,
-          message:"सामान का नाम और मात्रा बोलें, जैसे: दो किलो चीनी बिल में जोड़ो।"
+          message:"नया सामान दर्ज करने के लिए 'नया प्रोडक्ट' बोलें, या सामान और मात्रा बोलकर बिल में जोड़ें।"
         };
-      }
+      } 
     });
 
     voice.registerCommand({
