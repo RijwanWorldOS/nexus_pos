@@ -670,16 +670,7 @@ function handleProductRegistrationSpeech(text) {
       }
     }); 
 
-        const parsed = parseBillSpeech(original);
-
-        return isAddIntent(original) ||
-          parsed.quantity.found ||
-          matchProducts(parsed.nameQuery).length > 0;
-
-      run:function (context) {
-        return handleProductSpeech(context.text);
-      }
-    });
+        
 
     window.toggleContinuousVoice = togglePosVoice;
 
