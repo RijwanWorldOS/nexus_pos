@@ -225,7 +225,7 @@ function getProducts() {
     if (!q) return [];
 
     const stopWords = new Set([
-      "का", "की", "के", "में", "पर", "एक", "दो",
+      "का", "की", "के", "में", "पर",
       "please", "the", "a", "an", "and", "for"
     ]);
 
@@ -235,7 +235,7 @@ function getProducts() {
     if (!queryTokens.length) return [];
 
     function editDistance(a, b) {
-      const row = Array.from({ length:b.length + 1 }, (_,i) => i);
+      const row = Array.from({ length: b.length + 1 }, (_, i) => i);
 
       for (let i = 1; i <= a.length; i++) {
         let previous = row[0];
@@ -272,6 +272,10 @@ function getProducts() {
         ...valuesOf(product.alternateNames)
       ].map(norm).filter(Boolean);
 
+      const nameTokens = names.flatMap(name =>
+        productNameForMatch(name).split(/\s+/)
+      ).filter(Boolean);
+
       const extraFields = [
         product.description,
         product.brand,
@@ -283,41 +287,59 @@ function getProducts() {
         product.genericName
       ].map(norm).filter(Boolean);
 
-      const nameTokens = names.flatMap(name =>
-        productNameForMatch(name).split(/\s+/)
-      ).filter(Boolean);
-
       const searchableTokens = [
         ...nameTokens,
         ...extraFields.flatMap(value => value.split(/\s+/))
       ];
 
-      if (!searchableTokens.length) return;
+      if (!nameTokens.length) return;
 
       let matched = 0;
       let nameMatched = 0;
+      let score = 0;
 
       queryTokens.forEach(token => {
-        const exact = searchableTokens.some(item => item === token);
-        const partial = searchableTokens.some(item =>
-          item.length >= 3 &&
+        const exactNameToken = nameTokens.some(item => item === token);
+
+        const partialNameToken = nameTokens.some(item =>
+          item.length >= 2 &&
+          token.length >= 2 &&
           (item.includes(token) || token.includes(item))
         );
 
-        const fuzzy = !exact && !partial &&
-          token.length >= 5 &&
-          searchableTokens.some(item =>
-            item.length >= 5 &&
+        const fuzzyNameToken = !exactNameToken && !partialNameToken &&
+          token.length >= 4 &&
+          nameTokens.some(item =>
+            item.length >= 4 &&
             editDistance(token, item) <= 1
           );
 
-        if (exact || partial || fuzzy) {
+        const exactAny = searchableTokens.some(item => item === token);
+
+        const partialAny = searchableTokens.some(item =>
+          item.length >= 2 &&
+          token.length >= 2 &&
+          (item.includes(token) || token.includes(item))
+        );
+
+        const fuzzyAny = !exactAny && !partialAny &&
+          token.length >= 4 &&
+          searchableTokens.some(item =>
+            item.length >= 4 &&
+            editDistance(token, item) <= 1
+          );
+
+        if (exactAny || partialAny || fuzzyAny) {
           matched++;
-          if (nameTokens.some(item =>
-            item === token ||
-            (item.length >= 3 && item.includes(token))
-          )) {
+
+          if (exactNameToken || partialNameToken || fuzzyNameToken) {
             nameMatched++;
+
+            if (exactNameToken) score += 30;
+            else if (partialNameToken) score += 18;
+            else score += 10;
+          } else {
+            score += 2;
           }
         }
       });
@@ -330,10 +352,8 @@ function getProducts() {
         name === q || productNameForMatch(name) === q
       );
 
-      const score =
-        coverage * 100 +
-        nameMatched * 12 +
-        (exactName ? 50 : 0);
+      score += coverage * 100;
+      if (exactName) score += 100;
 
       scored.push({ product, score });
     });
@@ -349,7 +369,8 @@ function getProducts() {
         item.score >= topScore - Math.max(5, topScore * 0.08)
       )
       .map(item => item.product);
-  } 
+  }
+
 
       
 function canonicalUnit(value) {
