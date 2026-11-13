@@ -526,7 +526,7 @@ function rateUnitFromText(text) {
         alert(result.message || "माइक शुरू नहीं हुआ।");
     }
 }
-
+window.toggleProductDnaVoice = toggleProductDnaVoice;
 function handleProductRegistrationSpeech(text) {
     const source = norm(text);
     const quantity = parseQuantity(source);
@@ -653,13 +653,15 @@ function handleProductRegistrationSpeech(text) {
       name:"pos-product-to-bill",
       priority:1000,
 
-      match:function (normalized, original) {
+      if (/(नया सामान|नया प्रोडक्ट|product dna|new product)/i.test(norm(original))) {
+          return false;
+        }
+
         const parsed = parseBillSpeech(original);
 
         return isAddIntent(original) ||
           parsed.quantity.found ||
           matchProducts(parsed.nameQuery).length > 0;
-      },
 
       run:function (context) {
         return handleProductSpeech(context.text);
