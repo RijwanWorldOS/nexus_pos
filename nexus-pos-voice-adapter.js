@@ -649,13 +649,26 @@ function handleProductRegistrationSpeech(text) {
       } 
     });
 
-    voice.registerCommand({
+   voice.registerCommand({
       name:"pos-product-to-bill",
       priority:1000,
 
-      if (/(नया सामान|नया प्रोडक्ट|product dna|new product)/i.test(norm(original))) {
+      match:function (normalized, original) {
+        if (/(नया सामान|नया प्रोडक्ट|product dna|new product)/i.test(norm(original))) {
           return false;
         }
+
+        const parsed = parseBillSpeech(original);
+
+        return isAddIntent(original) ||
+          parsed.quantity.found ||
+          matchProducts(parsed.nameQuery).length > 0;
+      },
+
+      run:function (context) {
+        return handleProductSpeech(context.text);
+      }
+    }); 
 
         const parsed = parseBillSpeech(original);
 
