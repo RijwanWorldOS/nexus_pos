@@ -4873,7 +4873,7 @@ branded.forEach(function (b) {
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(functio (global)  {
+(function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -5318,7 +5318,7 @@ branded.forEach(function (b) {
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function  (global0  {
+(function  (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
