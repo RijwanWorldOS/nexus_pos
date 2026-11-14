@@ -3578,7 +3578,7 @@ branded.forEach(function (b) {
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function () {
+(function (global) {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -4222,13 +4222,14 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* ============================================================
    CATEGORY 10: MILK, CURD & DAIRY PRODUCTS
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function () {
+(function (global)  {
+ 
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -4866,13 +4867,13 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* ============================================================
    CATEGORY 11: SALT, PAPAD & PICKLES
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function () {
+(functio (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -5311,13 +5312,13 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* ============================================================
    CATEGORY 12: SAUCES, KETCHUP, JAMS & SPREADS
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function () {
+(function  (global0  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -5848,13 +5849,13 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* ============================================================
    CATEGORY 13: DRY FRUITS, NUTS & SEEDS
    NEXUS FOOD MASTER DATABASE
    ============================================================ */
 
-(function () {
+(function  (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -6727,13 +6728,13 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* ============================================================
    CATEGORY 14: CHOCOLATES, CANDIES, TOFFEES & SWEETS
    PART 1 OF 2
    ============================================================ */
 
-(function () {
+(function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -8384,7 +8385,7 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
 
  (function (global) { 
   "use strict";
@@ -9036,7 +9037,7 @@ branded.forEach(function (b) {
 
 
     /* PART 1 CONTINUES IN PART 2 */
- (function () {
+ (function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -10014,8 +10015,9 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
- (function () {
+})(typeof window !== "undefined" ? window : globalThis);
+
+ (function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -10152,8 +10154,9 @@ branded.forEach(function (b) {
 
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
-})();
- (function () {
+})(typeof window !== "undefined" ? window : globalThis);
+    
+ (function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -10257,13 +10260,15 @@ branded.forEach(function (b) {
     { id: "hc-local-broom", name: "Local Broom", name_hi: "स्थानीय झाड़ू", aliases: ["local jhadu"], unit: "piece", type: "local_cleaning" }
   ];
 
-  DB.registerBrands(CATEGORY, brands);
+ DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
-})();
- (function () {
+
+})(typeof window !== "undefined" ? window : globalThis);
+
+(function (global) {
   "use strict";
 
-  const DB = global.NexusFoodMasterDatabase;
+  const DB = global.NexusFoodMasterDatabase; 
   if (!DB) throw new Error("NexusFoodMasterDatabase engine not found");
 
   const CATEGORY = "puja_religious_items";
@@ -10358,8 +10363,8 @@ branded.forEach(function (b) {
 
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
-})();
- (function () {
+})(typeof window !== "undefined" ? window : globalThis);
+ (function (global)  {
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
@@ -10513,7 +10518,7 @@ branded.forEach(function (b) {
 
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  /* =========================================================
    NEXUS POS — CATEGORY 21
    TOBACCO, GUTKHA, PAN MASALA & PAAN PRODUCTS
