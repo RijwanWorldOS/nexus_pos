@@ -9031,7 +9031,7 @@ branded.forEach(function (b) {
   DB.registerBrands(CATEGORY, brands);
   DB.registerProducts(CATEGORY, products);
 
-})();
+})(typeof window !== "undefined" ? window : globalThis);
  
 
 
