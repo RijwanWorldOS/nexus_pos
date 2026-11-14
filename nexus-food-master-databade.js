@@ -8375,8 +8375,18 @@ branded.forEach(function (b) {
       id: "sweet-local-gajak",
       name: "Local Loose Gajak",
       name_hi: "खुली लोकल गजक",
-      aliases: ["local
- (function () {
+     aliases: ["local gajak", "loose gajak", "गजक", "खुली गजक"],
+      unit: "kg",
+      type: "local_sweet"
+    }
+  ];
+
+  DB.registerBrands(CATEGORY, brands);
+  DB.registerProducts(CATEGORY, products);
+
+})();
+
+ (function (global) { 
   "use strict";
 
   const DB = global.NexusFoodMasterDatabase;
